@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <link rel="stylesheet" href="style.css">
+
     <!-- ArcGIS CSS -->
     <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
     <!-- ArcGIS JS -->
@@ -18,6 +19,29 @@
 <main>
     <!-- Map container -->
     <div id="map" style="width: 100%; height: 610px;"></div>
+
+<!--    Table with info-->
+    <div id="kladilnici-container">
+        <table id="kladilnici-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NAME</th>
+                    <th>ADRESS</th>
+                </tr>
+            </thead>
+            <tbody>
+<!--             Dynamically inserting data-->
+            </tbody>
+        </table>
+
+<!--        Pagination-->
+        <div id="pagination">
+            <button id="prev">Previous</button>
+            <span id="page-info"></span>
+            <button id="next">Next</button>
+        </div>
+    </div>
 
 </main>
 
