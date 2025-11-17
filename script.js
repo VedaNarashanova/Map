@@ -6,17 +6,20 @@ function loadHTML(id, url) {
         })
         .catch(error => console.error(`Error loading ${url}:`, error));
 }
-
 // Load header and footer
 loadHTML('header', 'header.html');
 loadHTML('footer', 'footer.html');
 
 
-//load the map
+
+let view;//global promenliva
+//load the map ---------------------------------------------------------------------
 require([
     "esri/Map",
-    "esri/views/MapView"
-], function(Map, MapView) {
+    "esri/views/MapView",
+    "esri/layers/GraphicsLayer",// a layer added to the map that holds points.lines
+    "esri/Graphic"
+], function(Map, MapView,GraphicsLayer,Graphic) {
 
     // Create the map
     const map = new Map({
@@ -24,16 +27,58 @@ require([
     });
 
     // Create the view
-    const view = new MapView({
+    view = new MapView({
         container: "map",      // Div ID
         map: map,
         center: [21.43, 41.998], // Skopje coordinates [longitude, latitude]
         zoom: 12
     });
+
+    //creating a graphics layer
+    const graphicsLayer=new GraphicsLayer();
+    map.add(graphicsLayer);
+
+    async function loadAndDrawKladilnici(){
+        const response=await fetch(LAYER_URL);
+        const data=await response.json();
+
+        data.features.forEach(feature =>{
+            // const geometry=feature.geometry;
+            // console.log(geometry);
+
+            const { x, y } = feature.geometry;
+            const { lat, lon } = mercatorToLatLon(x, y);
+
+            const pointGraphic=new Graphic({
+                geometry:{
+                    type:"point",
+                    longitude: lon,
+                    latitude: lat
+                },
+                symbol:{
+                    type:"simple-marker",
+                    color:"red",
+                    size:"10px"
+                },
+                attributes:feature.attributes,
+                popupTemplate:{
+                    title:"{ime}",
+                    content: `
+                        <b>Address:</b> {adresa}<br>
+                        <b>ID:</b> {objectid}
+                    `
+                }
+            });
+            graphicsLayer.add(pointGraphic)
+        });
+    }
+    loadAndDrawKladilnici();
 });
 
 
-//load the JSON data
+
+
+//load the JSON data ------------------------------------------------------------------------------------------
 const LAYER_URL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1/query?where=1%3D1&text=&objectIds=&time=&timeRelation=esriTimeRelationOverlaps&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=objectid%2Cime%2Cadresa&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&returnExtentOnly=false&sqlFormat=none&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=pjson"
 
 // fetch(LAYER_URL)
@@ -58,21 +103,32 @@ async function loadKladilnici(){
     try{
         const response=await fetch(LAYER_URL);
         const data=await response.json();
+        kladilnici = data.features.map(feature =>{
+            const {x,y}=feature.geometry;
+            const {lat,lon} = mercatorToLatLon(x,y)
 
-        kladilnici=data.features.map(feature=>({
-            id:  feature.attributes.objectid,
-            name : feature.attributes.ime,
-            adress:  feature.attributes.adresa,
-        }));
+            return{
+                id:  feature.attributes.objectid,
+                name : feature.attributes.ime,
+                adress:  feature.attributes.adresa,
+                lat,
+                lon
+            }
+        })
+        // kladilnici=data.features.map(feature=>({
+        //     id:  feature.attributes.objectid,
+        //     name : feature.attributes.ime,
+        //     adress:  feature.attributes.adresa,
+        // }));
 
         renderPage();
     }
     catch (error){
-        console.log("ERROR")
+        console.log("ERROR",error)
     }
 }
 
-//render page of kladilnica in the table
+//render page of kladilnica in the table --------------------------------------------------------------
 function renderPage(){
     const tableBody=document.querySelector("#kladilnici-table tbody");
     tableBody.innerHTML=""//clear previous table rows
@@ -84,6 +140,14 @@ function renderPage(){
     pageItems.forEach(item=>{
         const row=document.createElement("tr");
         row.innerHTML=`<td>${item.id}</td> <td>${item.name}</td> <td>${item.adress}</td>`;
+
+        //click listener for the location of the kladilnica
+        row.addEventListener("click", () => {
+            view.goTo({
+                center:[item.lon,item.lat],
+                zoom: 17
+            })
+        })
         tableBody.appendChild(row)
     });
 
@@ -109,3 +173,14 @@ document.getElementById("next").addEventListener("click", () => {
 });
 
 loadKladilnici();
+
+
+
+
+//math for converting coordinates into longtitude and latitude  ------------------------------------------------------------------
+function mercatorToLatLon(x, y) {
+    const R = 6378137; // radius of Earth in meters
+    const lon = x / R * (180 / Math.PI);
+    const lat = (2 * Math.atan(Math.exp(y / R)) - Math.PI/2) * (180 / Math.PI);
+    return { lat, lon };
+}
