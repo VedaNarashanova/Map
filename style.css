@@ -10,27 +10,103 @@ main {
     flex: 1; /* pushes footer to bottom */
 }
 
-/* Header and Footer styling */
-header, footer {
-    background-color: cornflowerblue;
-    height: 50px;
+#logo-wrapper{
+    background-color: white;
+    border-radius: 100px;
+    width: 45px;
+    height: 45px;
+}
+header {
+    background-color: rgb(14,20,98);
+    height: 65px;
     width: 100%;
 }
 header ul {
+    display: flex;
     list-style: none;
-    padding: 15px;
-    margin-left: 80px;
+    padding-top: 10px;
+    padding-left: 50px;
 }
 header ul li {
     display: inline;
     margin-right: 15px;
 }
 header a{
+    margin-top: 5px;
     text-decoration: none;
     color: white;
-    font-size: large;
+    font-size: x-large;
+}
+header #logo{
+    width: 30px;
+    height: 30px;
+    padding-left: 8px;
+    padding-top: 7px;
+}
+#footer {
+    background-color: rgb(14,20,98);
+    color: white;
+    text-align: center;
+    padding-top: 10px;
+    margin-top: 20px;
+}
+.footer-links {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 0;
+    margin: 0 0 10px 0;
+}
+.footer-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+}
+#map{
+    border-bottom: 3px solid rgb(14,20,98);
 }
 
-footer p {
-    margin: 10px 0;
+#kladilnici-container {
+    padding-left: 50px;
+    padding-right: 50px;
+    overflow: hidden;
+    border-radius: 20px;
+}
+#kladilnici-table {
+    width: 100%;
+    border-collapse: separate; /* must use 'separate' for border-radius */
+    border-spacing: 2px;         /* remove gaps between cells */
+    font-family: Arial, sans-serif;
+    margin-top: 20px;
+    border-radius: 0px;       /* double radius */
+    overflow: hidden;          /* ensure inner cells don’t overflow corners */
+}
+#kladilnici-table th, #kladilnici-table td{
+    border: 1px solid rgb(14,20,98);
+    padding: 8px 12px;
+    text-align: center;
+}
+#kladilnici-table th:first-child, #kladilnici-table td:first-child{
+    background-color: rgb(14,20,98);
+    color: white;
+}
+#pagination{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: rgb(234,234,246);
+    border-radius: 50px;
+    text-align: center;
+    margin-top: 10px;
+
+}
+#prev, #next{
+    background-color: rgb(14,20,98);
+    border-radius: 50px;
+    color: white;
+    width: 100px;
+    height: 50px;
+}
+#prev:hover, #next:hover{
+    background-color: lightblue;
 }

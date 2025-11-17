@@ -12,14 +12,22 @@ loadHTML('footer', 'footer.html');
 
 
 
+
 let view;//global promenliva
 //load the map ---------------------------------------------------------------------
 require([
     "esri/Map",
     "esri/views/MapView",
     "esri/layers/GraphicsLayer",// a layer added to the map that holds points.lines
-    "esri/Graphic"
-], function(Map, MapView,GraphicsLayer,Graphic) {
+    "esri/Graphic",
+    "esri/widgets/Bookmarks",
+    "esri/widgets/Expand",
+    "esri/widgets/Compass",
+    "esri/widgets/Home",
+    "esri/widgets/LayerList",
+    "esri/widgets/BasemapGallery",
+    "esri/widgets/CoordinateConversion",
+], function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion) {
 
     // Create the map
     const map = new Map({
@@ -31,11 +39,96 @@ require([
         container: "map",      // Div ID
         map: map,
         center: [21.43, 41.998], // Skopje coordinates [longitude, latitude]
-        zoom: 12
+        zoom: 12,
+        constraints:{
+            rotationEnable:true
+        }
     });
 
     //creating a graphics layer
     const graphicsLayer=new GraphicsLayer();
+    const bookmarks=new Bookmarks({
+        view:view,
+        visibleElements:{
+            addBookmarkButton: true,
+            editBookmarkButton:true
+        },
+        draggable: true,
+        // whenever a new bookmark is created, a 100x100 px
+        // screenshot of the view will be taken and the rotation, scale, and extent
+        // of the view will not be set as the viewpoint of the new bookmark
+        defaultCreateOptions: {
+            takeScreenshot: true,
+            captureViewpoint: false,
+            captureTimeExtent: false, // the time extent of the view will not be saved in the bookmark
+            screenshotSettings: {
+                width: 100,
+                height: 100
+            }}
+    })
+    const bookmarksExpand=new Expand({
+        view:view,
+        content:bookmarks,
+        expandTooltip:"Bookmarks"
+    })
+    view.ui.add(bookmarksExpand,"top-left")
+    bookmarks.on("bookmark-select", function(event){
+        bookmarksExpand.expanded=false
+    })
+
+    const compass=new Compass({
+        view:view
+    })
+    view.ui.add(compass,"top-left")
+
+    const home=new Home({
+        view:view
+    })
+    view.ui.add(home,"top-left")
+
+    const layerList=new LayerList({
+        view,
+        listItemCreatedFunction: function(event) {
+            // Only modify your graphics layer
+            if (event.item.layer === graphicsLayer) {
+                // Remove the title so only the eye is shown
+                event.item.title = "Kladilnici";
+                // Optionally remove the layer actions if you want to keep it minimal
+                event.item.actionsSections = [];
+            }
+        }
+    })
+    const layerExpand=new Expand({
+        view:view,
+        content:layerList,
+        expandTooltip:"Visibility"
+    })
+    view.ui.add(layerExpand,"top-left")
+    layerList.on("layer-select", function(event){
+        layerExpand.expanded=false
+    })
+
+    let basemapGallery = new BasemapGallery({
+        view: view
+    });
+    const baseMapExpand=new Expand({
+        view:view,
+        content:basemapGallery,
+        expandTooltip:"BaseMap"
+    })
+    view.ui.add(baseMapExpand,"top-left")
+    basemapGallery.on("baseMap-select", function(event){
+        baseMapExpand.expanded=false
+    })
+
+    let ccWidget = new CoordinateConversion({
+        view: view
+    });
+    view.ui.add(ccWidget, "bottom-left");
+
+
+
+
     map.add(graphicsLayer);
 
     async function loadAndDrawKladilnici(){
@@ -74,6 +167,7 @@ require([
     }
     loadAndDrawKladilnici();
 });
+
 
 
 
@@ -139,15 +233,28 @@ function renderPage(){
 
     pageItems.forEach(item=>{
         const row=document.createElement("tr");
-        row.innerHTML=`<td>${item.id}</td> <td>${item.name}</td> <td>${item.adress}</td>`;
+        row.innerHTML=`
+            <td>${item.id}</td>
+            <td>${item.name}</td> 
+            <td>${item.adress}</td>
+<!--        <td><button class="bookmark-btn">Bookmark</td>-->`;
 
-        //click listener for the location of the kladilnica
+        //click listener for the locating the kladilnica
         row.addEventListener("click", () => {
             view.goTo({
                 center:[item.lon,item.lat],
                 zoom: 17
             })
         })
+        // row.querySelector(".bookmark-btn").addEventListener("clicl", (event) =>{
+        //     event.stopPropagation() //prevent row click zoom
+        //     bookmarks.addBookmark({
+        //         name:item.name,
+        //         extent:view.extent.clone()
+        //     })
+        //     alert(`${item.name} added to bookmarks!`);
+        // })
+
         tableBody.appendChild(row)
     });
 
@@ -173,6 +280,7 @@ document.getElementById("next").addEventListener("click", () => {
 });
 
 loadKladilnici();
+
 
 
 
