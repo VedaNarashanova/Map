@@ -192,6 +192,7 @@ const LAYER_URL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kaz
 let kladilnici = [];  // store all features
 let currentPage = 1;
 const pageSize = 10;  // 10 items per page
+let filteredKladilnici=[];
 
 async function loadKladilnici(){
     try{
@@ -229,7 +230,9 @@ function renderPage(){
 
     const start=(currentPage-1) * pageSize;
     const end=start+ pageSize;
-    const pageItems=kladilnici.slice(start,end);
+    // const pageItems=kladilnici.slice(start,end);
+    const source=filteredKladilnici.length>0 ? filteredKladilnici : kladilnici;
+    const pageItems=source.slice(start,end);
 
     pageItems.forEach(item=>{
         const row=document.createElement("tr");
@@ -260,7 +263,8 @@ function renderPage(){
 
     //update page info
     const pageInfo = document.getElementById("page-info");
-    const totalPages=Math.ceil(kladilnici.length/pageSize);
+    // const totalPages=Math.ceil(kladilnici.length/pageSize);
+    const totalPages=Math.ceil(source.length/pageSize);
     pageInfo.textContent=`Page ${currentPage} of ${totalPages}`;
     document.getElementById("prev").disabled=currentPage===1;
     document.getElementById("next").disabled=currentPage===totalPages;
@@ -284,6 +288,25 @@ loadKladilnici();
 
 
 
+//search logic ---------------------------------------
+const searchInput=document.getElementById("search")
+const searchBtn=document.getElementById("search-btn")
+
+searchBtn.addEventListener("click",()=>{
+    const input=searchInput.value.trim().toLowerCase()
+    if(!input){
+        filteredKladilnici=[];
+        currentPage=1;
+        renderPage();
+        return
+    }
+    filteredKladilnici=kladilnici.filter(k=>
+        k.name.toLowerCase().includes(input)
+    );
+    currentPage=1;
+    renderPage();
+})
+
 
 //math for converting coordinates into longtitude and latitude  ------------------------------------------------------------------
 function mercatorToLatLon(x, y) {
@@ -291,4 +314,74 @@ function mercatorToLatLon(x, y) {
     const lon = x / R * (180 / Math.PI);
     const lat = (2 * Math.atan(Math.exp(y / R)) - Math.PI/2) * (180 / Math.PI);
     return { lat, lon };
+}
+
+
+//for images slider -------------------------------------------------------------------------------------------------------------
+// const images=[
+//     "images/k1.jpg",
+//     "images/k2.jpg",
+//     "images/k3.jpg",
+//     "images/k4.jpg",
+//     "images/k5.jpg",
+//     "images/k6.jpg"
+// ]
+// let currentIndex=0;
+//
+// const sliderImage=document.getElementById("slider-image");
+// const prevBtn=document.getElementById("prev-btn")
+// const nextBtn=document.getElementById("next-btn")
+// const openGallery=document.getElementById("gallery-btn")
+//
+// document.querySelector("#gallery-slider").style.display="none"
+//
+// openGallery.addEventListener("click", ()=>{
+//     document.querySelector("#gallery-slider").style.display="block";
+//     sliderImage.src=images[currentIndex];
+// })
+// nextBtn.addEventListener("click", ()=>{
+//     currentIndex=(currentIndex+1)%images.length;
+//     sliderImage.src=images[currentIndex];
+// })
+// prevBtn.addEventListener("click", ()=>{
+//     currentIndex=(currentIndex-1+images.length)%images.length;
+//     sliderImage.src=images[currentIndex];
+// })
+const slides=document.querySelectorAll(".slides img")
+let slideIndex=0;
+const slider=document.querySelector(".slider");
+const galleryBtn=document.getElementById("gallery-btn")
+
+galleryBtn.addEventListener("click", ()=>{
+    slider.style.display="flex";
+    initializeSlider();
+})
+
+
+function initializeSlider(){
+    slides[slideIndex].classList.add("displaySlide");
+}
+function showSlide(index){
+
+    if(index >= slides.length){
+        slideIndex=0;
+    }else if(index<0){
+        slideIndex=slides.length-1;
+    }
+    slides.forEach(slide =>{
+        slide.classList.remove("displaySlide")
+    })
+    slides[slideIndex].classList.add("displaySlide");
+}
+function prevSlide(){
+    slideIndex--;
+    showSlide(slideIndex)
+}
+function nextSlide(){
+    slideIndex++;
+    showSlide((slideIndex))
+}
+function closeGallery() {
+    slider.style.display = "none";           // hide slider
+    document.body.classList.remove("slider-active"); // remove gray overlay
 }

@@ -20,6 +20,33 @@
     <!-- Map container -->
     <div id="map" style="width: 100%; height: 600px;"></div>
 
+    <div id="top-wrapper">
+        <div id="search-input">
+            <input type="text" id="search" placeholder="Search by name">
+            <button id="search-btn">Search</button>
+        </div>
+
+<div id="gallery-overlay">
+        <div class="slider">
+            <button class="close-slider" onclick="closeGallery()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">✕</button> <!-- X button -->
+            <div class="slides">
+                <img src="images/k1.jpg" alt="Slider" class="slide">
+                <img src="images/k2.jpg" alt="Slider" class="slide">
+                <img src="images/k3.jpg" alt="Slider" class="slide">
+                <img src="images/k4.jpg" alt="Slider" class="slide">
+                <img src="images/k5.jpg" alt="Slider" class="slide">
+                <img src="images/k6.jpg" alt="Slider" class="slide">
+            </div>
+            <div class="slider-buttons">
+                <button class="prev-btn" onclick="prevSlide()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">⟨</button>
+                <button id="next-btn" onclick="nextSlide()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">⟩</button>
+            </div>
+        </div>
+</div>
+        <button id="gallery-btn">Gallery</button>
+
+    </div>
+
 <!--    Table with info-->
     <div id="kladilnici-container">
         <table id="kladilnici-table">
