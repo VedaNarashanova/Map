@@ -1,5 +1,5 @@
 function loadHTML(id, url) {
-    fetch(url)
+    return fetch(url)
         .then(response => response.text())
         .then(data => {
             document.getElementById(id).innerHTML = data;
@@ -7,9 +7,16 @@ function loadHTML(id, url) {
         .catch(error => console.error(`Error loading ${url}:`, error));
 }
 // Load header and footer
-loadHTML('header', 'header.html');
-loadHTML('footer', 'footer.html');
+// loadHTML('header', 'header.html');
 
+loadHTML('header', 'header.html').then(() => {
+    const languageSelect = document.getElementById("translate");
+
+    languageSelect.addEventListener("change", () => {
+        translatePage(languageSelect.value);
+    });
+});
+loadHTML('footer', 'footer.html');
 
 
 
@@ -385,3 +392,57 @@ function closeGallery() {
     slider.style.display = "none";           // hide slider
     document.body.classList.remove("slider-active"); // remove gray overlay
 }
+
+
+
+
+
+//Translation ------------------------------------------------------------------------
+function translatePage(lang){
+    // Translate inner text
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        el.textContent = translations[lang][key];
+    });
+
+    // Translate placeholders
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        el.placeholder = translations[lang][key];
+    });
+}
+const translations={
+    en:{
+        id:"ID",
+        name:"Name",
+        adress:"Adress",
+        search_placeholder:"Search by name",
+        search:"Search",
+        gallery:"Gallery",
+        previous:"Previous",
+        next:"Next",
+        home:"Home",
+        video:"Video",
+        contact:"Contact",
+        read_more_policy:"Read more about our Privacy Policy",
+        read_more_service:"Read more about our Terms of Service",
+        read_more_contact:"If you have any question please Contact us"
+    },
+    mk:{
+        id:"ИД",
+        name:"Име",
+        adress:"Адреса",
+        search_placeholder:"Пребарај според име",
+        search:"Пребарај",
+        gallery:"Галерија",
+        previous:"Претходно",
+        next:"Следно",
+        home:"Дома",
+        video:"Видео",
+        contact:"Контакт",
+        read_more_policy:"Прочитајте повеже за нашата полиса за приватност",
+        read_more_service:"Прочитајте повеже за нашите услови за користење.",
+        read_more_contact:"Ако имаш прашања, ве замолуваме исконтактирајте не."
+    }
+}
+
