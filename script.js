@@ -21,6 +21,7 @@ loadHTML('footer', 'footer.html');
 
 
 let view;//global promenliva
+let widgets={};
 //load the map ---------------------------------------------------------------------
 require([
     "esri/Map",
@@ -54,45 +55,40 @@ require([
 
     //creating a graphics layer
     const graphicsLayer=new GraphicsLayer();
+
+//bookmarks
     const bookmarks=new Bookmarks({
         view:view,
         visibleElements:{
             addBookmarkButton: true,
             editBookmarkButton:true
         },
-        draggable: true,
-        // whenever a new bookmark is created, a 100x100 px
-        // screenshot of the view will be taken and the rotation, scale, and extent
-        // of the view will not be set as the viewpoint of the new bookmark
-        defaultCreateOptions: {
-            takeScreenshot: true,
-            captureViewpoint: false,
-            captureTimeExtent: false, // the time extent of the view will not be saved in the bookmark
-            screenshotSettings: {
-                width: 100,
-                height: 100
-            }}
     })
     const bookmarksExpand=new Expand({
         view:view,
         content:bookmarks,
-        expandTooltip:"Bookmarks"
+        expandTooltip:"Bookmarks",
     })
     view.ui.add(bookmarksExpand,"top-left")
     bookmarks.on("bookmark-select", function(event){
         bookmarksExpand.expanded=false
     })
 
+//compass
     const compass=new Compass({
-        view:view
+        view:view,
     })
     view.ui.add(compass,"top-left")
+    widgets.compass=compass
+
 
     const home=new Home({
         view:view
     })
     view.ui.add(home,"top-left")
+    widgets.home=home;
 
+//layerList
     const layerList=new LayerList({
         view,
         listItemCreatedFunction: function(event) {
@@ -114,7 +110,9 @@ require([
     layerList.on("layer-select", function(event){
         layerExpand.expanded=false
     })
+    widgets.LayerList=layerExpand
 
+//baseMap
     let basemapGallery = new BasemapGallery({
         view: view
     });
@@ -127,11 +125,14 @@ require([
     basemapGallery.on("baseMap-select", function(event){
         baseMapExpand.expanded=false
     })
+    widgets.baseMapExpand=baseMapExpand
 
+//ccWidget
     let ccWidget = new CoordinateConversion({
         view: view
     });
     view.ui.add(ccWidget, "bottom-left");
+    widgets.ccWidget=ccWidget
 
 
 
@@ -196,7 +197,7 @@ const LAYER_URL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kaz
 //     })
 //     .catch(error => console.error("ERROR FETCHING DATA: ", error));
 
-let kladilnici = [];  // store all features
+let kladilnici = [];
 let currentPage = 1;
 const pageSize = 10;  // 10 items per page
 let filteredKladilnici=[];
@@ -217,12 +218,6 @@ async function loadKladilnici(){
                 lon
             }
         })
-        // kladilnici=data.features.map(feature=>({
-        //     id:  feature.attributes.objectid,
-        //     name : feature.attributes.ime,
-        //     adress:  feature.attributes.adresa,
-        // }));
-
         renderPage();
     }
     catch (error){
@@ -396,7 +391,6 @@ function closeGallery() {
 
 
 
-
 //Translation ------------------------------------------------------------------------
 function translatePage(lang){
     // Translate inner text
@@ -421,12 +415,19 @@ const translations={
         gallery:"Gallery",
         previous:"Previous",
         next:"Next",
-        home:"Home",
+        Home:"Home",
         video:"Video",
         contact:"Contact",
         read_more_policy:"Read more about our Privacy Policy",
         read_more_service:"Read more about our Terms of Service",
-        read_more_contact:"If you have any question please Contact us"
+        read_more_contact:"If you have any question please Contact us",
+        english:"English",
+        macedonian:"Macedonian",
+        bookmarks: "Bookmarks",
+        compass: "Compass",
+        home: "Home",
+        basemap: "Base Map",
+        visibility: "Visibility"
     },
     mk:{
         id:"ИД",
@@ -437,12 +438,22 @@ const translations={
         gallery:"Галерија",
         previous:"Претходно",
         next:"Следно",
-        home:"Дома",
+        Home:"Дома",
         video:"Видео",
         contact:"Контакт",
         read_more_policy:"Прочитајте повеже за нашата полиса за приватност",
         read_more_service:"Прочитајте повеже за нашите услови за користење.",
-        read_more_contact:"Ако имаш прашања, ве замолуваме исконтактирајте не."
+        read_more_contact:"Ако имаш прашања, ве замолуваме исконтактирајте не.",
+        english:"Англиски",
+        macedonian:"Македонски",
+        bookmarks: "Обележувачи",
+        compass: "Компас",
+        home: "Почетен екран",
+        basemap: "Основна мапа",
+        visibility: "Видливост"
     }
 }
+//TO DO - TRANSLATE WIDGETS
+//MAKE GALLERY PICTURES APPEAR IN THE CENTER AND THE BACKGROUND IS GRAY AND NON ACTIVE
+
 
