@@ -35,11 +35,16 @@ require([
     "esri/widgets/LayerList",
     "esri/widgets/BasemapGallery",
     "esri/widgets/CoordinateConversion",
-], function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion) {
+    "esri/widgets/Print",
+    "esri/widgets/Sketch",
+    "esri/widgets/TimeZoneLabel",
+    "esri/widgets/ElevationProfile",
+], function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion,Print,Sketch,TimeZoneLabel,ElevationProfile) {
 
     // Create the map
     const map = new Map({
-        basemap: "streets-navigation-vector" // choose a basemap
+        basemap: "streets-navigation-vector", // choose a basemap
+        ground: "world-elevation"
     });
 
     // Create the view
@@ -55,6 +60,7 @@ require([
 
     //creating a graphics layer
     const graphicsLayer=new GraphicsLayer();
+
 
 //bookmarks
     const bookmarks=new Bookmarks({
@@ -81,7 +87,7 @@ require([
     view.ui.add(compass,"top-left")
     widgets.compass=compass
 
-
+//home
     const home=new Home({
         view:view
     })
@@ -133,6 +139,66 @@ require([
     });
     view.ui.add(ccWidget, "bottom-left");
     widgets.ccWidget=ccWidget
+
+//timezone
+    const timeZoneLabel = new TimeZoneLabel({ expandDirection: "end", view: view });
+
+// Manually assign the widget to the View's UI.
+    view.ui.add(timeZoneLabel, "top-left");
+
+//print
+    const print = new Print({
+        view: view,
+        // specify your own print service
+        printServiceUrl:
+            "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+    });
+    const printExpand=new Expand({
+        view:view,
+        content:print,
+        expandTooltip:"Print",
+    })
+    view.ui.add(printExpand,"bottom-right")
+    print.on("print", function(event){
+        printExpand.expanded=false
+    })
+
+//elevation
+    const elevationProfile = new ElevationProfile({
+        view:view,
+        profiles: [
+            {
+                type: "ground",   // Use ground elevation
+                color: "blue"
+            }
+        ]
+    });
+    const elevationExpand=new Expand({
+        view:view,
+        content:elevationProfile,
+        expandTooltip:"Bookmarks",
+    })
+    view.ui.add(elevationExpand,"bottom-right")
+    elevationProfile.on("elevation-select", function(event){
+        elevationExpand.expanded=false
+    })
+
+//sketch
+    // Create a new instance of sketch widget and set its required parameters
+    let sketch = new Sketch({
+        layer: graphicsLayer,
+        view: view,
+        availableCreateTools: ["point", "polyline", "polygon", "rectangle", "circle"], // which shapes users can draw
+        visibleElements: {
+            selectionTools: {
+                "rectangle-selection": true,
+                "lasso-selection": true
+            },
+        },
+    });
+    view.ui.add(sketch, "top-right");
+
+
 
 
 
@@ -353,18 +419,21 @@ const slides=document.querySelectorAll(".slides img")
 let slideIndex=0;
 const slider=document.querySelector(".slider");
 const galleryBtn=document.getElementById("gallery-btn")
+const overlay=document.getElementById("overlay")
+
 
 galleryBtn.addEventListener("click", ()=>{
-    console.log("clicked")
     slider.style.display="flex";
+    // overlay.style.display='block';
+    document.body.style.overflow = "hidden"; // disable background scrolling
     initializeSlider();
 })
 
 function initializeSlider(){
     slides[slideIndex].classList.add("displaySlide");
 }
-function showSlide(index){
 
+function showSlide(index){
     if(index >= slides.length){
         slideIndex=0;
     }else if(index<0){
@@ -385,9 +454,9 @@ function nextSlide(){
 }
 function closeGallery() {
     slider.style.display = "none";           // hide slider
-    document.body.classList.remove("slider-active"); // remove gray overlay
+    // overlay.style.display='none'
+    // document.body.style.overflow = "hidden"; // disable background scrolling
 }
-
 
 
 

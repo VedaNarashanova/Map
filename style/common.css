@@ -45,11 +45,13 @@ header ul li {
     display: inline;
     margin-right: 15px;
 }
+
 header a{
     text-decoration: none;
     color: white;
     font-size: x-large;
-    margin-top: 20px;
+    margin-top: 10px;
+    display: inline-block;
 }
 header #logo{
     width: 30px;
