@@ -355,10 +355,10 @@ const slider=document.querySelector(".slider");
 const galleryBtn=document.getElementById("gallery-btn")
 
 galleryBtn.addEventListener("click", ()=>{
+    console.log("clicked")
     slider.style.display="flex";
     initializeSlider();
 })
-
 
 function initializeSlider(){
     slides[slideIndex].classList.add("displaySlide");
