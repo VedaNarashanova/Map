@@ -52,7 +52,7 @@ require([
         container: "map",      // Div ID
         map: map,
         center: [21.43, 41.998], // Skopje coordinates [longitude, latitude]
-        zoom: 12,
+        zoom: 13,
         constraints:{
             rotationEnable:true
         }
@@ -200,6 +200,25 @@ require([
 
 
 
+    // Listen for clicks on the map view
+    view.on("click", event => {
+        // Perform a hit test to see if the click hits any graphics
+        view.hitTest(event).then(response => {
+            // Find the first graphic in our graphicsLayer that was clicked
+            const graphic = response.results
+                .find(r => r.graphic?.layer === graphicsLayer)  // check if the result has a graphic in our layer
+                ?.graphic;                                      // get the actual Graphic object
+
+            // If a graphic was clicked
+            if (graphic) {
+                // Open a popup at the clicked location using the graphic's popupTemplate
+                view.openPopup({
+                    features: [graphic],      // the clicked graphic to show info for
+                    location: event.mapPoint  // where on the map to open the popup
+                });
+            }
+        });
+    });
 
 
 
@@ -237,7 +256,9 @@ require([
                 }
             });
             graphicsLayer.add(pointGraphic)
+            console.log(pointGraphic.popupTemplate)
         });
+
     }
     loadAndDrawKladilnici();
 });
@@ -248,20 +269,6 @@ require([
 
 //load the JSON data ------------------------------------------------------------------------------------------
 const LAYER_URL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1/query?where=1%3D1&text=&objectIds=&time=&timeRelation=esriTimeRelationOverlaps&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=objectid%2Cime%2Cadresa&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&returnExtentOnly=false&sqlFormat=none&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=pjson"
-
-// fetch(LAYER_URL)
-//     .then(response => response.json())
-//     .then(data => {
-//         console.log("DATA from JSON:", data);
-//         data.features.forEach(feature => {
-//             const id = feature.attributes.objectid;
-//             const name = feature.attributes.ime;
-//             const adress = feature.attributes.adresa;
-//
-//             console.log(id, name, adress);
-//         });
-//     })
-//     .catch(error => console.error("ERROR FETCHING DATA: ", error));
 
 let kladilnici = [];
 let currentPage = 1;
@@ -356,7 +363,7 @@ loadKladilnici();
 
 
 
-//search logic ---------------------------------------
+//search kladilnici ---------------------------------------
 const searchInput=document.getElementById("search")
 const searchBtn=document.getElementById("search-btn")
 
@@ -375,6 +382,54 @@ searchBtn.addEventListener("click",()=>{
     renderPage();
 })
 
+//sorting the table ---------------------------------------------------------------------------------
+const sortOrder={
+    id:"asc", //column:value
+    name:"asc",
+    adress:"asc"
+}
+
+function sortTable(column) {
+    const source = filteredKladilnici.length > 0 ? filteredKladilnici : kladilnici;
+    const order = sortOrder[column]; //we get the value of that column
+//sortOrder[column] = direction, a[column] = data value.
+//a is one row of the table (an object like {id:1, name:"Alpha", adress:"Street A"}).
+//
+// column is a variable that can be "id", "name", or "adress".
+//
+// a[column] dynamically gets the value of that property aka id,name or adress.
+    source.sort((a, b) => {
+        let valA = a[column];//will give the value stored in that column, this is like a[name] or a[id]
+        let valB = b[column];
+
+        if (typeof valA === "string") {
+            valA = valA.toLowerCase();
+            valB = valB.toLowerCase();
+        }
+
+        if (order === "asc") return valA > valB ? 1 : valA < valB ? -1 : 0;
+        else return valA < valB ? 1 : valA > valB ? -1 : 0;
+    });
+
+    // Toggle order for next click
+    sortOrder[column] = order === "asc" ? "desc" : "asc";
+
+    currentPage = 1;
+    renderPage();
+}
+
+// Add click event to headers
+document.querySelectorAll("#kladilnici-table th").forEach(th => {
+    th.addEventListener("click", () => {
+        sortTable(th.getAttribute("data-column"));
+    });
+});
+
+
+
+
+
+
 
 //math for converting coordinates into longtitude and latitude  ------------------------------------------------------------------
 function mercatorToLatLon(x, y) {
@@ -386,35 +441,6 @@ function mercatorToLatLon(x, y) {
 
 
 //for images slider -------------------------------------------------------------------------------------------------------------
-// const images=[
-//     "images/k1.jpg",
-//     "images/k2.jpg",
-//     "images/k3.jpg",
-//     "images/k4.jpg",
-//     "images/k5.jpg",
-//     "images/k6.jpg"
-// ]
-// let currentIndex=0;
-//
-// const sliderImage=document.getElementById("slider-image");
-// const prevBtn=document.getElementById("prev-btn")
-// const nextBtn=document.getElementById("next-btn")
-// const openGallery=document.getElementById("gallery-btn")
-//
-// document.querySelector("#gallery-slider").style.display="none"
-//
-// openGallery.addEventListener("click", ()=>{
-//     document.querySelector("#gallery-slider").style.display="block";
-//     sliderImage.src=images[currentIndex];
-// })
-// nextBtn.addEventListener("click", ()=>{
-//     currentIndex=(currentIndex+1)%images.length;
-//     sliderImage.src=images[currentIndex];
-// })
-// prevBtn.addEventListener("click", ()=>{
-//     currentIndex=(currentIndex-1+images.length)%images.length;
-//     sliderImage.src=images[currentIndex];
-// })
 const slides=document.querySelectorAll(".slides img")
 let slideIndex=0;
 const slider=document.querySelector(".slider");
@@ -424,8 +450,6 @@ const overlay=document.getElementById("overlay")
 
 galleryBtn.addEventListener("click", ()=>{
     slider.style.display="flex";
-    // overlay.style.display='block';
-    document.body.style.overflow = "hidden"; // disable background scrolling
     initializeSlider();
 })
 
@@ -453,75 +477,16 @@ function nextSlide(){
     showSlide((slideIndex))
 }
 function closeGallery() {
-    slider.style.display = "none";           // hide slider
-    // overlay.style.display='none'
-    // document.body.style.overflow = "hidden"; // disable background scrolling
+    slider.style.display = "none";
+    // document.body.style.overflow = "auto"; // <--- RESTORE SCROLL
 }
+
+//Exporting ---------------------------------------------------------------------------------------
 
 
 
 //Translation ------------------------------------------------------------------------
-function translatePage(lang){
-    // Translate inner text
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        el.textContent = translations[lang][key];
-    });
 
-    // Translate placeholders
-    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
-        const key = el.getAttribute("data-i18n-placeholder");
-        el.placeholder = translations[lang][key];
-    });
-}
-const translations={
-    en:{
-        id:"ID",
-        name:"Name",
-        adress:"Adress",
-        search_placeholder:"Search by name",
-        search:"Search",
-        gallery:"Gallery",
-        previous:"Previous",
-        next:"Next",
-        Home:"Home",
-        video:"Video",
-        contact:"Contact",
-        read_more_policy:"Read more about our Privacy Policy",
-        read_more_service:"Read more about our Terms of Service",
-        read_more_contact:"If you have any question please Contact us",
-        english:"English",
-        macedonian:"Macedonian",
-        bookmarks: "Bookmarks",
-        compass: "Compass",
-        home: "Home",
-        basemap: "Base Map",
-        visibility: "Visibility"
-    },
-    mk:{
-        id:"ИД",
-        name:"Име",
-        adress:"Адреса",
-        search_placeholder:"Пребарај според име",
-        search:"Пребарај",
-        gallery:"Галерија",
-        previous:"Претходно",
-        next:"Следно",
-        Home:"Дома",
-        video:"Видео",
-        contact:"Контакт",
-        read_more_policy:"Прочитајте повеже за нашата полиса за приватност",
-        read_more_service:"Прочитајте повеже за нашите услови за користење.",
-        read_more_contact:"Ако имаш прашања, ве замолуваме исконтактирајте не.",
-        english:"Англиски",
-        macedonian:"Македонски",
-        bookmarks: "Обележувачи",
-        compass: "Компас",
-        home: "Почетен екран",
-        basemap: "Основна мапа",
-        visibility: "Видливост"
-    }
-}
 //TO DO - TRANSLATE WIDGETS
 //MAKE GALLERY PICTURES APPEAR IN THE CENTER AND THE BACKGROUND IS GRAY AND NON ACTIVE
 

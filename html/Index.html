@@ -12,12 +12,16 @@
     <!-- ArcGIS JS -->
     <script src="https://js.arcgis.com/4.29/"></script>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+
+
 
 
 </head>
 <body>
 <div id="header"></div>
-<!--<div id="overlay"></div>-->
+
 
 <main>
     <!-- Map container -->
@@ -26,29 +30,27 @@
     <div id="top-wrapper">
         <div id="search-input">
             <input type="text" id="search" placeholder="Search by name" data-i18n-placeholder="search_placeholder">
-            <button id="search-btn" data-i18n="search">Search</button>
+            <button id="search-btn" data-i18n="search">Search <i class="fas fa-magnifying-glass"></i> </button>
         </div>
-
-<!--        ne znam kako da ja napravam pozadinata siva i neaktivna-->
-<div id="gallery-overlay">
-        <div class="slider">
-            <button class="close-slider" onclick="closeGallery()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">✕</button>
-            <div class="slides">
-                <img src="../images/k1.jpg" alt="Slider" class="slide">
-                <img src="../images/k2.jpg" alt="Slider" class="slide">
-                <img src="../images/k3.jpg" alt="Slider" class="slide">
-                <img src="../images/k4.jpg" alt="Slider" class="slide">
-                <img src="../images/k5.jpg" alt="Slider" class="slide">
-                <img src="../images/k6.jpg" alt="Slider" class="slide">
-            </div>
-            <div class="slider-buttons">
-                <button class="prev-btn" onclick="prevSlide()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">&#10094</button>
-                <button id="next-btn" onclick="nextSlide()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">&#10095</button>
-            </div>
+    <!--        ne znam kako da ja napravam pozadinata siva i neaktivna-->
+        <div id="gallery-overlay">
+                <div class="slider">
+                    <button class="close-slider" onclick="closeGallery()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">✕</button>
+                    <div class="slides">
+                        <img src="../images/k1.jpg" alt="Slider" class="slide">
+                        <img src="../images/k2.jpg" alt="Slider" class="slide">
+                        <img src="../images/k3.jpg" alt="Slider" class="slide">
+                        <img src="../images/k4.jpg" alt="Slider" class="slide">
+                        <img src="../images/k5.jpg" alt="Slider" class="slide">
+                        <img src="../images/k6.jpg" alt="Slider" class="slide">
+                    </div>
+                    <div class="slider-buttons">
+                        <button class="prev-btn" onclick="prevSlide()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">&#10094</button>
+                        <button id="next-btn" onclick="nextSlide()" style="background-color: rgb(234,234,246); color:rgb(14,20,98)">&#10095</button>
+                    </div>
+                </div>
         </div>
-</div>
-        <button id="gallery-btn" data-i18n="gallery">Gallery</button>
-
+        <button id="gallery-btn" data-i18n="gallery">Gallery <i class="fas fa-images"></i></button>
     </div>
 
 <!--    Table with info-->
@@ -56,9 +58,9 @@
         <table id="kladilnici-table">
             <thead>
                 <tr>
-                    <th data-i18n="id">ID</th>
-                    <th data-i18n="name">NAME</th>
-                    <th data-i18n="adress">ADRESS</th>
+                    <th data-i18n="id" data-column="id">ID &#9650;</th>
+                    <th data-i18n="name" data-column="name">NAME &#9650;</th>
+                    <th data-i18n="adress" data-column="adress">ADRESS &#9650;</th>
                 </tr>
             </thead>
             <tbody>
@@ -69,16 +71,30 @@
 <!--        Pagination-->
 
         <div id="pagination">
-            <button id="prev" data-i18n="previous">Previous</button>
+            <button id="prev" data-i18n="previous"><i class="fas fa-chevron-left"></i> Previous </button>
             <span id="page-info"></span>
-            <button id="next" data-i18n="next">Next</button>
+            <button id="next" data-i18n="next">Next <i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
 
+    <div id="export-container">
+        <button id="export-btn">Export</button>
+        <select id="export-select">
+            <option value="pdf">PDF</option>
+            <option value="excel">Excel</option>
+        </select>
+    </div>
 </main>
 
 <div id="footer"></div>
+
+
+
+
+
 <script src="../js/script.js"></script>
+<script src="../js/common.js"></script>
+
 
 
 </body>

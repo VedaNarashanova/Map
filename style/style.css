@@ -9,12 +9,14 @@
 #search-input{
     margin-left: 50px;
     background-color: rgb(14,20,98);
-    width: 260px;
+    width: 290px;
     border-radius: 50px;
     height: 60px;
     display: flex;
     align-items: center;
     padding-left: 20px;
+    padding-right: 20px;
+    gap: 10px;
 }
 #search,#search-btn{
     border-radius: 20px;
@@ -25,25 +27,33 @@
 }
 #search-btn{
     pad-right: 50px;
+    width: 150px;
+}
+#search-btn:hover{
+    background-color: lightblue;
+    color: rgb(14,20,98);
 }
 
-#overlay{
-    position: fixed;
-    top:0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    z-index: 100;
-}
+
+
+
+
+
 #gallery-overlay {
-    position: fixed;
+    display: flex;       /* stays in the middle of screen */
     top: 0;
-    left: 25%;
-    justify-content: center;  /* center horizontally */
-    align-items: center;      /* center vertically */
+    left: 0;
+    justify-content: center;
+    align-items: center;   /* centers slider vertically + horizontally */
+    z-index: 9999;
 }
+/*#gallery-overlay {*/
+/*    position: relative;*/
+/*    top: 0;*/
+/*    left: 0;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*}*/
 #gallery-btn{
     border-radius: 20px;
     background-color: rgb(14,20,98);
@@ -67,26 +77,21 @@
     border-radius: 50%;
     cursor: pointer;
     z-index: 10000;
-
-    display: flex;            /* make button a flex container */
-    justify-content: center;  /* center horizontally */
-    align-items: center;      /* center vertically */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .slider {
     position: relative;
-    /*left: -55px;*/
     width: 100%;
     max-width: 850px;
     height: 600px;
-    /*display: flex;*/
     justify-content: center;
     align-items: center;
     flex-direction: column; /* stack image and buttons vertically */
-    background-color: rgb(14,20,98); /* optional for contrast */
+    background-color: rgb(14,20,98);
     display: none;
-    /*padding: 20px;*/
     padding: 50px 30px 10px 30px;
-    /*padding-bottom: 10px;*/
     border: 2px solid  rgb(234,234,246);
 }
 .slider img {
@@ -134,7 +139,7 @@ img.displaySlide {
     width: 100%;
     border-collapse: separate; /* must use 'separate' for border-radius */
     border-spacing: 2px;         /* remove gaps between cells */
-
+    table-layout: fixed;
     margin-top: 20px;
     border-radius: 0px;       /* double radius */
     overflow: hidden;          /* ensure inner cells don’t overflow corners */
@@ -144,10 +149,25 @@ img.displaySlide {
     padding: 8px 12px;
     text-align: center;
 }
-#kladilnici-table th:first-child, #kladilnici-table td:first-child{
+#kladilnici-table th:nth-child(1),
+#kladilnici-table td:nth-child(1){
+    width: 10%;
+}
+#kladilnici-table th:nth-child(2),
+#kladilnici-table td:nth-child(2){
+    width: 30%;
+}
+#kladilnici-table th:first-child,
+#kladilnici-table th:nth-child(2),
+#kladilnici-table th:nth-child(3),
+#kladilnici-table td:first-child{
     background-color: rgb(14,20,98);
     color: white;
 }
+#kladilnici-table tbody tr:nth-child(even){
+    background-color: rgb(234,234,246);
+}
+
 #pagination{
     padding-top: 10px;
     padding-bottom: 10px;
@@ -155,7 +175,6 @@ img.displaySlide {
     border-radius: 50px;
     text-align: center;
     margin-top: 10px;
-
 }
 #prev, #next{
     background-color: rgb(14,20,98);
@@ -167,4 +186,20 @@ img.displaySlide {
 #prev:hover, #next:hover{
     background-color: lightblue;
     color: rgb(14,20,98);
+}
+
+#export-container {
+    display: flex;                /* use flexbox */
+    align-items: center;          /* vertically center items */
+    justify-content: center;      /* horizontally center items inside container */
+    gap: 5px;                     /* space between button and select */
+    border-radius: 50px;
+    width: 200px;                 /* adjust as needed */
+    height: 50px;
+    background-color: rgb(14,20,98);
+    color: white;
+    margin-top: 10px;
+    margin-right: 50px;
+    /* Push container to right of parent */
+    margin-left: auto;            /* only works if parent is display: flex */
 }

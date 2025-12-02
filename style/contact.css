@@ -120,6 +120,9 @@
     border-image-slice: 1;
     height: 620px;
 }
+.contact-info p{
+    font-size: 14px;
+}
 /*for resizing*/
 @media(max-width: 800px){
     .contact-inputs{
