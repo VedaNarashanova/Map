@@ -1,29 +1,18 @@
-function loadHTML(id, url) {
-    return fetch(url)
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById(id).innerHTML = data;
-        })
-        .catch(error => console.error(`Error loading ${url}:`, error));
-}
-// Load header and footer
-// loadHTML('header', 'header.html');
-
-loadHTML('header', 'header.html').then(() => {
-    const languageSelect = document.getElementById("translate");
-
-    languageSelect.addEventListener("change", () => {
-        translatePage(languageSelect.value);
-    });
-});
-loadHTML('footer', 'footer.html');
-
-
-
-let view;//global promenliva
+let view;
 let widgets={};
+let SymbolDrawing;
+let graphicsLayer
+const SYMBOL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1?f=pjson"//get the first layer and turn it into json
+//load the symbols ----------------------------------------------------------------
+async function loadSymbol(){
+    const response2=await fetch(SYMBOL);
+    const symboldata=await response2.json();
+    SymbolDrawing=symboldata.drawingInfo.renderer.symbol
+    console.log(SymbolDrawing)
+}
+
 //load the map ---------------------------------------------------------------------
-require([
+loadSymbol().then(() =>{require([
     "esri/Map",
     "esri/views/MapView",
     "esri/layers/GraphicsLayer",// a layer added to the map that holds points.lines
@@ -39,65 +28,70 @@ require([
     "esri/widgets/Sketch",
     "esri/widgets/TimeZoneLabel",
     "esri/widgets/ElevationProfile",
-], function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion,Print,Sketch,TimeZoneLabel,ElevationProfile) {
+    "esri/widgets/Locate",
+    "esri/widgets/Fullscreen",
+    "esri/widgets/Measurement",
+    "esri/widgets/ScaleBar"
+],
+function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion,Print,Sketch,TimeZoneLabel,ElevationProfile, Locate, Fullscreen, Measurement, ScaleBar) {
 
-    // Create the map
+// Create the map
     const map = new Map({
         basemap: "streets-navigation-vector", // choose a basemap
         ground: "world-elevation"
     });
 
-    // Create the view
+// Create the view
     view = new MapView({
         container: "map",      // Div ID
         map: map,
         center: [21.43, 41.998], // Skopje coordinates [longitude, latitude]
         zoom: 13,
-        constraints:{
-            rotationEnable:true
+        constraints: {
+            rotationEnable: true
         }
     });
 
-    //creating a graphics layer
-    const graphicsLayer=new GraphicsLayer();
+//creating a graphics layer
+    graphicsLayer = new GraphicsLayer();
 
 
 //bookmarks
-    const bookmarks=new Bookmarks({
-        view:view,
-        visibleElements:{
+    const bookmarks = new Bookmarks({
+        view: view,
+        visibleElements: {
             addBookmarkButton: true,
-            editBookmarkButton:true
+            editBookmarkButton: true
         },
     })
-    const bookmarksExpand=new Expand({
-        view:view,
-        content:bookmarks,
-        expandTooltip:"Bookmarks",
+    const bookmarksExpand = new Expand({
+        view: view,
+        content: bookmarks,
+        expandTooltip: "Bookmarks",
     })
-    view.ui.add(bookmarksExpand,"top-left")
-    bookmarks.on("bookmark-select", function(event){
-        bookmarksExpand.expanded=false
+    view.ui.add(bookmarksExpand, "top-left")
+    bookmarks.on("bookmark-select", function (event) {
+        bookmarksExpand.expanded = false
     })
 
 //compass
-    const compass=new Compass({
-        view:view,
+    const compass = new Compass({
+        view: view,
     })
-    view.ui.add(compass,"top-left")
-    widgets.compass=compass
+    view.ui.add(compass, "top-left")
+    widgets.compass = compass
 
 //home
-    const home=new Home({
-        view:view
+    const home = new Home({
+        view: view
     })
-    view.ui.add(home,"top-left")
-    widgets.home=home;
+    view.ui.add(home, "top-left")
+    widgets.home = home;
 
 //layerList
-    const layerList=new LayerList({
+    const layerList = new LayerList({
         view,
-        listItemCreatedFunction: function(event) {
+        listItemCreatedFunction: function (event) {
             // Only modify your graphics layer
             if (event.item.layer === graphicsLayer) {
                 // Remove the title so only the eye is shown
@@ -107,44 +101,70 @@ require([
             }
         }
     })
-    const layerExpand=new Expand({
-        view:view,
-        content:layerList,
-        expandTooltip:"Visibility"
+    const layerExpand = new Expand({
+        view: view,
+        content: layerList,
+        expandTooltip: "Visibility"
     })
-    view.ui.add(layerExpand,"top-left")
-    layerList.on("layer-select", function(event){
-        layerExpand.expanded=false
+    view.ui.add(layerExpand, "top-left")
+    layerList.on("layer-select", function (event) {
+        layerExpand.expanded = false
     })
-    widgets.LayerList=layerExpand
+    widgets.LayerList = layerExpand
 
 //baseMap
     let basemapGallery = new BasemapGallery({
         view: view
     });
-    const baseMapExpand=new Expand({
-        view:view,
-        content:basemapGallery,
-        expandTooltip:"BaseMap"
+    const baseMapExpand = new Expand({
+        view: view,
+        content: basemapGallery,
+        expandTooltip: "BaseMap"
     })
-    view.ui.add(baseMapExpand,"top-left")
-    basemapGallery.on("baseMap-select", function(event){
-        baseMapExpand.expanded=false
+    view.ui.add(baseMapExpand, "top-left")
+    basemapGallery.on("baseMap-select", function (event) {
+        baseMapExpand.expanded = false
     })
-    widgets.baseMapExpand=baseMapExpand
+    widgets.baseMapExpand = baseMapExpand
 
 //ccWidget
     let ccWidget = new CoordinateConversion({
         view: view
     });
     view.ui.add(ccWidget, "bottom-left");
-    widgets.ccWidget=ccWidget
+    widgets.ccWidget = ccWidget
 
-//timezone
-    const timeZoneLabel = new TimeZoneLabel({ expandDirection: "end", view: view });
 
-// Manually assign the widget to the View's UI.
-    view.ui.add(timeZoneLabel, "top-left");
+//my location
+    const locateWidget = new Locate({
+        view: view
+    });
+    view.ui.add(locateWidget, "top-left");
+
+//full screen
+    const fullscreen = new Fullscreen({
+        view: view
+    });
+    view.ui.add(fullscreen, "top-left");
+
+
+// Measurement widget (distance + area)
+    const measurement = new Measurement({
+        view: view,
+        // activeTool: null  // <-- inactive by default
+    });
+
+// Wrap it in an Expand widget
+//     const measurementExpand = new Expand({
+//         view: view,
+//         content: measurement,
+//         expandTooltip: "Measurement",
+//         expanded: false  // collapsed by default
+//     });
+
+// Add the Expand to the UI instead of the raw widget
+    view.ui.add(measurement, "top-left");
+
 
 //print
     const print = new Print({
@@ -153,19 +173,19 @@ require([
         printServiceUrl:
             "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
     });
-    const printExpand=new Expand({
-        view:view,
-        content:print,
-        expandTooltip:"Print",
+    const printExpand = new Expand({
+        view: view,
+        content: print,
+        expandTooltip: "Print",
     })
-    view.ui.add(printExpand,"bottom-right")
-    print.on("print", function(event){
-        printExpand.expanded=false
+    view.ui.add(printExpand, "bottom-right")
+    print.on("print", function (event) {
+        printExpand.expanded = false
     })
 
 //elevation
     const elevationProfile = new ElevationProfile({
-        view:view,
+        view: view,
         profiles: [
             {
                 type: "ground",   // Use ground elevation
@@ -173,14 +193,14 @@ require([
             }
         ]
     });
-    const elevationExpand=new Expand({
-        view:view,
-        content:elevationProfile,
-        expandTooltip:"Bookmarks",
+    const elevationExpand = new Expand({
+        view: view,
+        content: elevationProfile,
+        expandTooltip: "Bookmarks",
     })
-    view.ui.add(elevationExpand,"bottom-right")
-    elevationProfile.on("elevation-select", function(event){
-        elevationExpand.expanded=false
+    view.ui.add(elevationExpand, "bottom-right")
+    elevationProfile.on("elevation-select", function (event) {
+        elevationExpand.expanded = false
     })
 
 //sketch
@@ -199,8 +219,7 @@ require([
     view.ui.add(sketch, "top-right");
 
 
-
-    // Listen for clicks on the map view
+// Listen for clicks on the map view
     view.on("click", event => {
         // Perform a hit test to see if the click hits any graphics
         view.hitTest(event).then(response => {
@@ -224,6 +243,10 @@ require([
 
     map.add(graphicsLayer);
 
+
+
+
+
     async function loadAndDrawKladilnici(){
         const response=await fetch(LAYER_URL);
         const data=await response.json();
@@ -241,10 +264,14 @@ require([
                     longitude: lon,
                     latitude: lat
                 },
-                symbol:{
-                    type:"simple-marker",
-                    color:"red",
-                    size:"10px"
+                symbol: {
+                    type: "picture-marker",       //  important
+                    url: "data:image/png;base64," + SymbolDrawing.imageData, //  important
+                    width: SymbolDrawing.width,
+                    height: SymbolDrawing.height,
+                    angle: SymbolDrawing.angle || 0,
+                    xoffset: SymbolDrawing.xoffset || 0,
+                    yoffset: SymbolDrawing.yoffset || 0
                 },
                 attributes:feature.attributes,
                 popupTemplate:{
@@ -256,20 +283,19 @@ require([
                 }
             });
             graphicsLayer.add(pointGraphic)
-            console.log(pointGraphic.popupTemplate)
+            // console.log(pointGraphic.popupTemplate)
         });
 
     }
     loadAndDrawKladilnici();
+
+});
 });
 
 
 
-
-
 //load the JSON data ------------------------------------------------------------------------------------------
-const LAYER_URL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1/query?where=1%3D1&text=&objectIds=&time=&timeRelation=esriTimeRelationOverlaps&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=objectid%2Cime%2Cadresa&returnGeometry=true&returnTrueCurves=false&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&historicMoment=&returnDistinctValues=false&resultOffset=&resultRecordCount=&returnExtentOnly=false&sqlFormat=none&datumTransformation=&parameterValues=&rangeValues=&quantizationParameters=&featureEncoding=esriDefault&f=pjson"
-
+const LAYER_URL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1/query?where=1=1&outFields=objectid,ime,adresa&returnGeometry=true&f=pjson"
 let kladilnici = [];
 let currentPage = 1;
 const pageSize = 10;  // 10 items per page
@@ -288,7 +314,7 @@ async function loadKladilnici(){
                 name : feature.attributes.ime,
                 adress:  feature.attributes.adresa,
                 lat,
-                lon
+                lon,
             }
         })
         renderPage();
@@ -481,10 +507,44 @@ function closeGallery() {
     // document.body.style.overflow = "auto"; // <--- RESTORE SCROLL
 }
 
-//Exporting ---------------------------------------------------------------------------------------
+//Exporting in PDF---------------------------------------------------------------------------------------
+document.getElementById("exportPDF-btn").addEventListener("click", () => {
+    const table = document.getElementById("kladilnici-table").outerHTML;
 
+    const printWindow = window.open("", "", "width=800,height=600");
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Kladilnici PDF</title>
+                <style>
+                    table { border-collapse: collapse; width: 100%; }
+                    th, td { border: 1px solid #000; padding: 5px; text-align: left; }
+                    th { background-color: #eaeaf6; }
+                </style>
+            </head>
+            <body>
+                <h2>Kladilnici</h2>
+                ${table}
+            </body>
+        </html>
+    `);
 
-
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();  // opens PDF print dialog
+});
+//Export in Excel --------------------------------------------------------------------
+document.getElementById("exportEXCEL-btn").addEventListener("click", ()=>{
+    const table=document.getElementById("kladilnici-table")
+    const html=table.outerHTML;
+    const blob=new Blob([html],{type: "application/vnd.ms-excel"})
+    const url=URL.createObjectURL(blob)
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="kladilnici.xls"
+    a.click()
+    URL.revokeObjectURL(url)
+})
 //Translation ------------------------------------------------------------------------
 
 //TO DO - TRANSLATE WIDGETS

@@ -14,6 +14,10 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+
+
 
 
 
@@ -58,9 +62,9 @@
         <table id="kladilnici-table">
             <thead>
                 <tr>
-                    <th data-i18n="id" data-column="id">ID &#9650;</th>
-                    <th data-i18n="name" data-column="name">NAME &#9650;</th>
-                    <th data-i18n="adress" data-column="adress">ADRESS &#9650;</th>
+                    <th data-i18n="id" data-column="id">ID <i class="fas fa-arrow-up sort-arrow"></i></th>
+                    <th data-i18n="name" data-column="name">Name  <i class="fas fa-arrow-up sort-arrow"></i></th>
+                    <th data-i18n="adress" data-column="adress">Adress  <i class="fas fa-arrow-up sort-arrow"></i></th>
                 </tr>
             </thead>
             <tbody>
@@ -78,11 +82,13 @@
     </div>
 
     <div id="export-container">
-        <button id="export-btn">Export</button>
-        <select id="export-select">
-            <option value="pdf">PDF</option>
-            <option value="excel">Excel</option>
-        </select>
+        <p data-i18n="export">Export in:</p><br>
+        <button  data-i18n="pdf" id="exportPDF-btn">ExportToPDF <i class="fas fa-file-pdf"></i>PDF</button>
+        <button  data-i18n="excel" id="exportEXCEL-btn">ExportToExcel <i class="fas fa-file-excel"></i>EXCEL</button>
+<!--        <select id="export-select">-->
+<!--            <option value="pdf">PDF</option>-->
+<!--            <option value="excel">Excel</option>-->
+<!--        </select>-->
     </div>
 </main>
 
