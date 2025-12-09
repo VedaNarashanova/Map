@@ -11,7 +11,9 @@ function loadHTML(id, url) {
 
 loadHTML('header', 'header.html').then(() => {
     const languageSelect = document.getElementById("translate");
-    if (!languageSelect) return;
+    const currentFlagDiv = document.getElementById("current-flag");
+
+    if (!languageSelect || !currentFlagDiv) return;
 
     const defaultLang = "en";
 
@@ -19,13 +21,20 @@ loadHTML('header', 'header.html').then(() => {
     const savedLang = sessionStorage.getItem("selectedLanguage") || defaultLang;
     languageSelect.value = savedLang;
     translatePage(savedLang);
-
+    updateFlag(savedLang);
+    // translateWidgets(savedLang);
     // Update language while navigating
     languageSelect.addEventListener("change", () => {
         const lang = languageSelect.value;
         sessionStorage.setItem("selectedLanguage", lang);
         translatePage(lang);
+        translateWidgets(lang)
+        updateFlag(lang);
+        setTimeout(() => translateWidgets(lang), 700);
     });
+    function updateFlag(lang) {
+        currentFlagDiv.innerHTML = `<img src="${flagImages[lang]}" alt="${lang} flag" style="width:24px;height:16px;">`;
+    }
 });
 
 
@@ -79,11 +88,7 @@ const translations={
         read_more_contact:"If you have any question please Contact us",
         english:"English",
         macedonian:"Macedonian",
-        bookmarks: "Bookmarks",
-        compass: "Compass",
-        home: "Home ",
-        basemap: "Base Map",
-        visibility: "Visibility",
+        albanian:"Albanian",
         getInTouch:"Get in Touch",
         your_name:"Your name",
         your_email:"Your email",
@@ -96,7 +101,19 @@ const translations={
         mon:"Mon-Fri: 9–17",
         pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
         excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
-        export:"Export in:"
+        export:"Export in:",
+        compass: "Compass",
+        home: "Home",
+        basemap: "Base Map",
+        visibility: "Visibility",
+        bookmarks: "Bookmarks",
+        locate: "My Location",
+        fullscreen: "Fullscreen",
+        measurement: "Measurement",
+        print: "Print",
+        elevation: "Elevation Profile",
+        zoomin:"Zoom in",
+        zoomout:"Zoom out"
     },
     mk:{
         id:"ИД  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
@@ -115,11 +132,7 @@ const translations={
         read_more_contact:"Ако имаш прашања, ве замолуваме исконтактирајте не.",
         english:"Англиски",
         macedonian:"Македонски",
-        bookmarks: "Обележувачи",
-        compass: "Компас",
-        home: "Почетен екран",
-        basemap: "Основна мапа",
-        visibility: "Видливост",
+        albanian:"Албански",
         getInTouch:"Стапете во контакт",
         your_name:"Вашето има",
         your_email:"Вашиот мејл",
@@ -132,6 +145,72 @@ const translations={
         mon:"Пон-Пет: 9–17",
         pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
         excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
-        export:"Извези во:"
+        export:"Извези во:",
+        bookmarks: "Обележувачи",
+        compass: "Компас",
+        home: "Почетен екран",
+        basemap: "Основна мапа",
+        visibility: "Видливост",
+        locate: "Моја локација",
+        fullscreen: "Целосен екран",
+        measurement: "Мерки",
+        print: "Испринтај",
+        elevation: "Елевиран профил",
+        zoomin:"Зумирај",
+        zoomout:"Одзумирај",
+    },
+    sq: {
+        id:"ID  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
+        name:"Emri  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
+        adress:"Adresa  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
+        search_placeholder:"Kërko sipas emrit",
+        search: "Kërko <i class=\"fas fa-magnifying-glass\"></i>",
+        gallery:"Galeri  <i class=\"fas fa-images\"></i>",
+        previous:"Prapa <i class=\"fas fa-chevron-left\"></i>",
+        next:"Para <i class=\"fas fa-chevron-right\"></i>",
+        Home:"Ballina <i class=\"fas fa-house\"></i>",
+        video:"Video  <i class=\"fas fa-video\"></i>",
+        contact:"Kontakt <i class=\"fas fa-envelope\"></i>",
+        read_more_policy:"Lexo më shumë rreth Politikës së Privatësisë",
+        read_more_service:"Lexo më shumë rreth Kushteve të Shërbimit",
+        read_more_contact:"Nëse keni ndonjë pyetje, ju lutem na kontaktoni",
+        english:"Anglisht",
+        macedonian:"Maqedonisht",
+        albanian:"Shqip",
+        getInTouch:"Na kontaktoni",
+        your_name:"Emri juaj",
+        your_email:"Email-i juaj",
+        your_message:"Mesazhi juaj",
+        submit:"Dërgo",
+        Adress:"Adresa",
+        street:"Bulevardi Shën Kliment Ohrit 58b/2-4 MK",
+        phone:"Numri i telefonit",
+        hours:"Orari i punës",
+        mon:"Hën–Pre: 9–17",
+        pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
+        excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
+        export:"Eksporto në:",
+        compass: "Busull",
+        home: "Ballina",
+        basemap: "Harta Bazë",
+        visibility: "Dukshmëria",
+        bookmarks: "Faqerojtje",
+        locate: "Vendndodhja ime",
+        fullscreen: "Ekran i Plotë",
+        measurement: "Matje",
+        print: "Printo",
+        elevation: "Profili i Lartësisë",
+        zoomin:"Zmadho",
+        zoomout:"Zvogëlo"
     }
 }
+
+const flagImages = {
+    en: "../images/englis.webp",
+    mk: "../images/macedonia.webp",
+    sq: "../images/alb.svg"
+};
+
+
+
+

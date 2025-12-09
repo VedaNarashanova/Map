@@ -11,6 +11,8 @@ async function loadSymbol(){
     console.log(SymbolDrawing)
 }
 
+let savedLang = sessionStorage.getItem("selectedLanguage") || "en";
+
 //load the map ---------------------------------------------------------------------
 loadSymbol().then(() =>{require([
     "esri/Map",
@@ -30,10 +32,10 @@ loadSymbol().then(() =>{require([
     "esri/widgets/ElevationProfile",
     "esri/widgets/Locate",
     "esri/widgets/Fullscreen",
-    "esri/widgets/Measurement",
-    "esri/widgets/ScaleBar"
+    "esri/widgets/DistanceMeasurement2D",
+    "esri/widgets/Legend"
 ],
-function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion,Print,Sketch,TimeZoneLabel,ElevationProfile, Locate, Fullscreen, Measurement, ScaleBar) {
+function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion,Print,Sketch,TimeZoneLabel,ElevationProfile, Locate, Fullscreen, DistanceMeasurement2D, Legend) {
 
 // Create the map
     const map = new Map({
@@ -51,7 +53,11 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
             rotationEnable: true
         }
     });
-
+    view.when(() => {
+        // Run translation after map + all widgets fully render
+        const lang = sessionStorage.getItem("selectedLanguage") || "en";
+        setTimeout(() => translateWidgets(lang), 400);
+    });
 //creating a graphics layer
     graphicsLayer = new GraphicsLayer();
 
@@ -131,7 +137,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     let ccWidget = new CoordinateConversion({
         view: view
     });
-    view.ui.add(ccWidget, "bottom-left");
+    view.ui.add(ccWidget, "bottom-right");
     widgets.ccWidget = ccWidget
 
 
@@ -149,21 +155,22 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
 
 
 // Measurement widget (distance + area)
-    const measurement = new Measurement({
-        view: view,
-        // activeTool: null  // <-- inactive by default
+    let measurementWidget = new DistanceMeasurement2D({
+        view: view
     });
 
 // Wrap it in an Expand widget
-//     const measurementExpand = new Expand({
-//         view: view,
-//         content: measurement,
-//         expandTooltip: "Measurement",
-//         expanded: false  // collapsed by default
-//     });
+    const MeasurementExpand = new Expand({
+        view: view,
+        content: measurementWidget,
+        expandTooltip: "Measurement"
+    })
+    view.ui.add(MeasurementExpand, "top-left")
+    measurementWidget.on("measurement-select", function (event) {
+        MeasurementExpand.expanded = false
+    })
 
-// Add the Expand to the UI instead of the raw widget
-    view.ui.add(measurement, "top-left");
+    widgets.MeasurementExpand = MeasurementExpand
 
 
 //print
@@ -178,7 +185,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
         content: print,
         expandTooltip: "Print",
     })
-    view.ui.add(printExpand, "bottom-right")
+    view.ui.add(printExpand, "top-left")
     print.on("print", function (event) {
         printExpand.expanded = false
     })
@@ -198,10 +205,18 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
         content: elevationProfile,
         expandTooltip: "Bookmarks",
     })
-    view.ui.add(elevationExpand, "bottom-right")
+    view.ui.add(elevationExpand, "top-left")
     elevationProfile.on("elevation-select", function (event) {
         elevationExpand.expanded = false
     })
+
+
+    let legend = new Legend({
+        view: view
+    });
+
+    view.ui.add(legend, "bottom-right");
+
 
 //sketch
     // Create a new instance of sketch widget and set its required parameters
@@ -545,9 +560,57 @@ document.getElementById("exportEXCEL-btn").addEventListener("click", ()=>{
     a.click()
     URL.revokeObjectURL(url)
 })
-//Translation ------------------------------------------------------------------------
+//Cookies ------------------------------------------------------------------------
+setCookie = (cName,cValue,expdays) =>{
+    let date=new Date();
+    date.setTime(date.getTime()+(expdays *24 *60 *60 *1000))//so its in seconds
+    const expires = "expires="+date.toUTCString();
+    document.cookie=cName+ "=" + cValue + ";" + expires +"; path=/";
+    console.log("cookie created")
 
-//TO DO - TRANSLATE WIDGETS
+}
+getCookie=(cName) =>{
+    const name=cName+"=";
+    const cDecoded=decodeURIComponent(document.cookie);
+    const cArr=cDecoded.split("; ");
+    let value;
+    cArr.forEach(val =>{
+        if(val.indexOf(name) == 0) value=val.substring(name.length);
+    })
+
+    return value;
+}
+document.querySelector("#cookies-btn").addEventListener("click", () => {
+    document.querySelector("#cookies").style.display="none"
+    setCookie("cookie", "true", 30)//expier after 30 days
+})
+
+cookieMessage= () =>{
+    if(!getCookie("cookie"))
+        document.querySelector("#cookies").style.display="block";
+    console.log("get that cookie")
+}
+window.addEventListener("load",cookieMessage)
+
+
+//TRANSLATE WIDGETS ---------------------------------------------------------------------------
+function translateWidgets(lang){
+    const t=translations[lang];
+    document.querySelector('[title="Zoom in"]')?.setAttribute("title",t.zoomin)
+    document.querySelector('[title="Zoom out"]')?.setAttribute("title",t.zoomout)
+    document.querySelector('[title="Bookmarks"]')?.setAttribute("title",t.bookmarks)
+    document.querySelector('[title="Default map view"]')?.setAttribute("title",t.home)
+    document.querySelector('[title="Reset map orientation"]')?.setAttribute("title",t.compass)
+    document.querySelector('[title="BaseMap"]')?.setAttribute("title",t.basemap)
+    document.querySelector('[title="Visibility"]')?.setAttribute("title",t.visibility)
+    document.querySelector('[title="Find my location"]')?.setAttribute("title",t.locate)
+    document.querySelector('[title="Enter fullscreen"]')?.setAttribute("title",t.fullscreen)
+    document.querySelector('[title="Print"]')?.setAttribute("title",t.print)
+
+
+    // document.querySelector('[aria-label="Add conversion"]')?.setAttribute("title",t.AddConversion)
+
+}
 //MAKE GALLERY PICTURES APPEAR IN THE CENTER AND THE BACKGROUND IS GRAY AND NON ACTIVE
 
 
