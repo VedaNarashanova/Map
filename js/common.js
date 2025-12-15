@@ -28,7 +28,7 @@ loadHTML('header', 'header.html').then(() => {
         const lang = languageSelect.value;
         sessionStorage.setItem("selectedLanguage", lang);
         translatePage(lang);
-        translateWidgets(lang)
+        // translateWidgets(lang)
         updateFlag(lang);
         setTimeout(() => translateWidgets(lang), 700);
     });
@@ -94,10 +94,10 @@ const translations={
         your_email:"Your email",
         your_message:"Your message",
         submit:"Submit",
-        Adress:"Adress",
+        Adress:"Adress  <i class=\"fas fa-map-marker-alt\"></i>",
         street:"Boulevard Saint Kliment Ohridski 58b/2-4 MK",
-        phone:"Phone Number",
-        hours:"Working Hours",
+        phone:"Phone Number <i class=\"fas fa-phone\"></i>",
+        hours:"Working Hours <i class=\"fas fa-clock\"></i>",
         mon:"Mon-Fri: 9–17",
         pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
         excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
@@ -113,7 +113,9 @@ const translations={
         print: "Print",
         elevation: "Elevation Profile",
         zoomin:"Zoom in",
-        zoomout:"Zoom out"
+        zoomout:"Zoom out",
+        Footer:"If you have any problems, feel free to contact us at the phone number: 071/234567 or on social media:"
+
     },
     mk:{
         id:"ИД  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
@@ -138,10 +140,10 @@ const translations={
         your_email:"Вашиот мејл",
         your_message:"Вашата порака",
         submit:"Потврди",
-        Adress:"Адреса",
-        street:"Булевар Свети Климент Охридски 58б/2-4 MK",
-        phone:"Телефонски Број",
-        hours:"Работни Часови",
+        Adress:"Адреса <i class=\"fas fa-map-marker-alt\"></i>",
+        street:"Булевар Свети Климент Охридски 58б/2-4 MK  ",
+        phone:"Телефонски Број <i class=\"fas fa-phone\"></i>",
+        hours:"Работни Часови <i class=\"fas fa-clock\"></i>",
         mon:"Пон-Пет: 9–17",
         pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
         excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
@@ -158,6 +160,7 @@ const translations={
         elevation: "Елевиран профил",
         zoomin:"Зумирај",
         zoomout:"Одзумирај",
+        Footer:"Ако имате какви било проблеми, слободно контактирајте нè на телефонскиот број: 071/234567 или преку социјалните мрежи:"
     },
     sq: {
         id:"ID  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
@@ -182,10 +185,10 @@ const translations={
         your_email:"Email-i juaj",
         your_message:"Mesazhi juaj",
         submit:"Dërgo",
-        Adress:"Adresa",
-        street:"Bulevardi Shën Kliment Ohrit 58b/2-4 MK",
-        phone:"Numri i telefonit",
-        hours:"Orari i punës",
+        Adress:"Adresa <i class=\"fas fa-map-marker-alt\"></i>",
+        street:"Bulevardi Shën Kliment Ohrit 58b/2-4 MK  ",
+        phone:"Numri i telefonit <i class=\"fas fa-phone\"></i>",
+        hours:"Orari i punës <i class=\"fas fa-clock\"></i>",
         mon:"Hën–Pre: 9–17",
         pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
         excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
@@ -201,7 +204,9 @@ const translations={
         print: "Printo",
         elevation: "Profili i Lartësisë",
         zoomin:"Zmadho",
-        zoomout:"Zvogëlo"
+        zoomout:"Zvogëlo",
+        Footer:"Nëse keni ndonjë problem, mos hezitoni të na kontaktoni në numrin e telefonit: 071/234567 ose në rrjetet sociale:"
+
     }
 }
 

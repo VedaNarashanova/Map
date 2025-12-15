@@ -17,7 +17,7 @@ let savedLang = sessionStorage.getItem("selectedLanguage") || "en";
 loadSymbol().then(() =>{require([
     "esri/Map",
     "esri/views/MapView",
-    "esri/layers/GraphicsLayer",// a layer added to the map that holds points.lines
+    "esri/layers/GraphicsLayer",// a layer added to the map that holds the points of the kladilnici
     "esri/Graphic",
     "esri/widgets/Bookmarks",
     "esri/widgets/Expand",
@@ -33,9 +33,10 @@ loadSymbol().then(() =>{require([
     "esri/widgets/Locate",
     "esri/widgets/Fullscreen",
     "esri/widgets/DistanceMeasurement2D",
+        "esri/layers/FeatureLayer",
     "esri/widgets/Legend"
 ],
-function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion,Print,Sketch,TimeZoneLabel,ElevationProfile, Locate, Fullscreen, DistanceMeasurement2D, Legend) {
+function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, LayerList,BasemapGallery,CoordinateConversion,Print,Sketch,TimeZoneLabel,ElevationProfile, Locate, Fullscreen, DistanceMeasurement2D, FeatureLayer, Legend) {
 
 // Create the map
     const map = new Map({
@@ -53,13 +54,36 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
             rotationEnable: true
         }
     });
+
+
+    const featureLayer = new FeatureLayer({
+        url: "https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1",
+        outFields: ["*"],
+        popupEnabled: true
+    });
+
+    map.add(featureLayer);
+
     view.when(() => {
-        // Run translation after map + all widgets fully render
+        // Run translation after map and all widgets fully render
         const lang = sessionStorage.getItem("selectedLanguage") || "en";
         setTimeout(() => translateWidgets(lang), 400);
     });
+
 //creating a graphics layer
     graphicsLayer = new GraphicsLayer();
+    graphicsLayer.renderer = {
+        type: "simple",
+        label: "Kladilnici under 400m near a school",
+        symbol: {
+            type: "picture-marker",
+            url: "data:image/png;base64," + SymbolDrawing.imageData,
+            width: SymbolDrawing.width,
+            height: SymbolDrawing.height
+        }
+    };
+    graphicsLayer.title = "Kladilnici under 400m near a school";
+    map.add(graphicsLayer);
 
 
 //bookmarks
@@ -133,12 +157,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     })
     widgets.baseMapExpand = baseMapExpand
 
-//ccWidget
-    let ccWidget = new CoordinateConversion({
-        view: view
-    });
-    view.ui.add(ccWidget, "bottom-right");
-    widgets.ccWidget = ccWidget
+
 
 
 //my location
@@ -146,12 +165,6 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
         view: view
     });
     view.ui.add(locateWidget, "top-left");
-
-//full screen
-    const fullscreen = new Fullscreen({
-        view: view
-    });
-    view.ui.add(fullscreen, "top-left");
 
 
 // Measurement widget (distance + area)
@@ -190,36 +203,57 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
         printExpand.expanded = false
     })
 
-//elevation
-    const elevationProfile = new ElevationProfile({
-        view: view,
-        profiles: [
-            {
-                type: "ground",   // Use ground elevation
-                color: "blue"
-            }
-        ]
+//full screen
+    const fullscreen = new Fullscreen({
+        view: view
     });
-    const elevationExpand = new Expand({
-        view: view,
-        content: elevationProfile,
-        expandTooltip: "Bookmarks",
-    })
-    view.ui.add(elevationExpand, "top-left")
-    elevationProfile.on("elevation-select", function (event) {
-        elevationExpand.expanded = false
-    })
+    view.ui.add(fullscreen, "top-left");
 
 
+//legenda
     let legend = new Legend({
         view: view
     });
 
     view.ui.add(legend, "bottom-right");
 
+    //elevation
+    const elevationProfile = new ElevationProfile({
+        view: view,
+        profiles: [
+            {
+                type: "ground",   // Ground elevation
+                color: "blue"
+            },
+            {
+                type: "view",     // Elevation along view line (or another surface)
+                color: "green"
+            }
+        ]
+    });
+    measurementWidget.viewModel.activeTool = "distance";
+
+//Elevation
+    const elevationExpand = new Expand({
+        view: view,
+        content: elevationProfile,
+        expandTooltip: "Elevation",
+    })
+    view.ui.add(elevationExpand, "bottom-left")
+    elevationProfile.on("elevation-select", function (event) {
+        elevationExpand.expanded = false
+    })
+
+
+//ccWidget
+    let ccWidget = new CoordinateConversion({
+        view: view
+    });
+    view.ui.add(ccWidget, "top-right");
+    widgets.ccWidget = ccWidget
+
 
 //sketch
-    // Create a new instance of sketch widget and set its required parameters
     let sketch = new Sketch({
         layer: graphicsLayer,
         view: view,
@@ -232,6 +266,8 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
         },
     });
     view.ui.add(sketch, "top-right");
+
+
 
 
 // Listen for clicks on the map view
@@ -254,9 +290,8 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
         });
     });
 
-
-
-    map.add(graphicsLayer);
+    // console.log(graphicsLayer.renderer);
+    // map.add(graphicsLayer);
 
 
 
@@ -304,6 +339,12 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     }
     loadAndDrawKladilnici();
 
+    // console.log(graphicsLayer.graphics.items[0].symbol);
+    view.when(() => {
+        const legendVM = view.ui.find("legend")?.viewModel;
+        console.log(legendVM?.activeLayerInfos);
+    });
+
 });
 });
 
@@ -346,7 +387,7 @@ function renderPage(){
 
     const start=(currentPage-1) * pageSize;
     const end=start+ pageSize;
-    // const pageItems=kladilnici.slice(start,end);
+
     const source=filteredKladilnici.length>0 ? filteredKladilnici : kladilnici;
     const pageItems=source.slice(start,end);
 
@@ -404,24 +445,39 @@ loadKladilnici();
 
 
 
-//search kladilnici ---------------------------------------
-const searchInput=document.getElementById("search")
-const searchBtn=document.getElementById("search-btn")
+//search kladilnici --------------------------------------
+const searchInput = document.getElementById("search");
+const searchBtn = document.getElementById("search-btn");
 
-searchBtn.addEventListener("click",()=>{
-    const input=searchInput.value.trim().toLowerCase()
-    if(!input){
-        filteredKladilnici=[];
-        currentPage=1;
+
+function performSearch() {
+    const input = searchInput.value.trim().toLowerCase();
+
+    // If input is empty, clear the filtered list and render first page
+    if (!input) {
+        filteredKladilnici = [];
+        currentPage = 1;
         renderPage();
-        return
+        return;
     }
-    filteredKladilnici=kladilnici.filter(k=>
+
+    filteredKladilnici = kladilnici.filter(k =>
         k.name.toLowerCase().includes(input)
     );
-    currentPage=1;
+
+    currentPage = 1;
     renderPage();
-})
+}
+
+
+searchBtn.addEventListener("click", performSearch);
+
+
+searchInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        performSearch();
+    }
+});
 
 //sorting the table ---------------------------------------------------------------------------------
 const sortOrder={
@@ -434,10 +490,8 @@ function sortTable(column) {
     const source = filteredKladilnici.length > 0 ? filteredKladilnici : kladilnici;
     const order = sortOrder[column]; //we get the value of that column
 //sortOrder[column] = direction, a[column] = data value.
-//a is one row of the table (an object like {id:1, name:"Alpha", adress:"Street A"}).
-//
+//a is one row of the table (an object like {id:1, name:"Alpha", adress:"Street A"})
 // column is a variable that can be "id", "name", or "adress".
-//
 // a[column] dynamically gets the value of that property aka id,name or adress.
     source.sort((a, b) => {
         let valA = a[column];//will give the value stored in that column, this is like a[name] or a[id]
@@ -523,9 +577,37 @@ function closeGallery() {
 }
 
 //Exporting in PDF---------------------------------------------------------------------------------------
+//Exporting in PDF (updated to export all rows, not just current page)
 document.getElementById("exportPDF-btn").addEventListener("click", () => {
-    const table = document.getElementById("kladilnici-table").outerHTML;
+    // 1. Use filtered data if search is active, otherwise use full dataset
+    const source = filteredKladilnici.length > 0 ? filteredKladilnici : kladilnici;
 
+    // 2. Build the table HTML dynamically from all data
+    let tableHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    source.forEach(item => {
+        tableHTML += `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.name}</td>
+                <td>${item.adress}</td>
+            </tr>
+        `;
+    });
+
+    tableHTML += `</tbody></table>`;
+
+    // 3. Open a new window and write the table HTML into it
     const printWindow = window.open("", "", "width=800,height=600");
     printWindow.document.write(`
         <html>
@@ -535,31 +617,69 @@ document.getElementById("exportPDF-btn").addEventListener("click", () => {
                     table { border-collapse: collapse; width: 100%; }
                     th, td { border: 1px solid #000; padding: 5px; text-align: left; }
                     th { background-color: #eaeaf6; }
+                    /* Optional: Add page breaks for long tables */
+                    @media print {
+                        table { page-break-after: auto; }
+                        tr    { page-break-inside: avoid; page-break-after: auto; }
+                        td    { page-break-inside: avoid; page-break-after: auto; }
+                        thead { display: table-header-group; }
+                        tfoot { display: table-footer-group; }
+                    }
                 </style>
             </head>
             <body>
                 <h2>Kladilnici</h2>
-                ${table}
+                ${tableHTML}
             </body>
         </html>
     `);
 
+    // 4. Close document, focus window, and open print dialog
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();  // opens PDF print dialog
+    printWindow.print();
 });
 //Export in Excel --------------------------------------------------------------------
-document.getElementById("exportEXCEL-btn").addEventListener("click", ()=>{
-    const table=document.getElementById("kladilnici-table")
-    const html=table.outerHTML;
-    const blob=new Blob([html],{type: "application/vnd.ms-excel"})
-    const url=URL.createObjectURL(blob)
-    const a=document.createElement("a");
-    a.href=url;
-    a.download="kladilnici.xls"
-    a.click()
-    URL.revokeObjectURL(url)
-})
+// Export in Excel (updated to export all rows, not just current page)
+document.getElementById("exportEXCEL-btn").addEventListener("click", () => {
+    // 1. Use filtered data if a search is active, otherwise use full dataset
+    const source = filteredKladilnici.length > 0 ? filteredKladilnici : kladilnici;
+
+    // 2. Build the table HTML dynamically from all data
+    let tableHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    source.forEach(item => {
+        tableHTML += `
+            <tr>
+                <td>${item.id}</td>
+                <td>${item.name}</td>
+                <td>${item.adress}</td>
+            </tr>
+        `;
+    });
+
+    tableHTML += `</tbody></table>`;
+
+    // 3. Create a Blob and download as Excel
+    const blob = new Blob([tableHTML], { type: "application/vnd.ms-excel" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "kladilnici.xls";
+    a.click();
+    URL.revokeObjectURL(url); // free memory
+});
+
 //Cookies ------------------------------------------------------------------------
 setCookie = (cName,cValue,expdays) =>{
     let date=new Date();
@@ -594,6 +714,52 @@ window.addEventListener("load",cookieMessage)
 
 
 //TRANSLATE WIDGETS ---------------------------------------------------------------------------
+// const widgetLabels = {
+//     "Zoom in": "zoomin",
+//     "Zoom out": "zoomout",
+//     "Default map view": "home",
+//     "Reset map orientation": "compass",
+//     "Bookmarks": "bookmarks",
+//     "BaseMap": "basemap",
+//     "Visibility": "visibility",
+//     "Find my location": "locate",
+//     "Enter fullscreen": "fullscreen",
+//     "Exit fullscreen": "fullscreen",
+//     "Print": "print",
+//     "Measurement": "measurement",
+//     "Elevation Profile": "elevation",
+// };
+// function translateWidgets(lang) {
+//     const t = translations[lang];
+//
+//     Object.entries(widgetLabels).forEach(([original, key]) => {
+//
+//         // 1. aria-label
+//         document.querySelectorAll(`[aria-label="${original}"]`)
+//             .forEach(el => el.setAttribute("aria-label", t[key]));
+//
+//         // 2. title
+//         document.querySelectorAll(`[title="${original}"]`)
+//             .forEach(el => el.setAttribute("title", t[key]));
+//
+//         // 3. calcite shadow DOM (Compass, Home, Locate)
+//         document.querySelectorAll("calcite-button, calcite-icon")
+//             .forEach(el => {
+//                 if (el.title === original) {
+//                     el.title = t[key];
+//                 }
+//             });
+//     });
+// }
+// const widgetObserver = new MutationObserver(() => {
+//     const lang = sessionStorage.getItem("selectedLanguage") || "en";
+//     translateWidgets(lang);
+// });
+//
+// widgetObserver.observe(document.body, {
+//     childList: true,
+//     subtree: true
+// });
 function translateWidgets(lang){
     const t=translations[lang];
     document.querySelector('[title="Zoom in"]')?.setAttribute("title",t.zoomin)
@@ -606,11 +772,21 @@ function translateWidgets(lang){
     document.querySelector('[title="Find my location"]')?.setAttribute("title",t.locate)
     document.querySelector('[title="Enter fullscreen"]')?.setAttribute("title",t.fullscreen)
     document.querySelector('[title="Print"]')?.setAttribute("title",t.print)
+    document.querySelector('[title="Measurement"]')?.setAttribute("title",t.measurement)
 
 
     // document.querySelector('[aria-label="Add conversion"]')?.setAttribute("title",t.AddConversion)
 
+    document.querySelectorAll("calcite-button").forEach(btn => {
+        if (!btn.shadowRoot) return;
+
+        const innerBtn = btn.shadowRoot.querySelector('button[title="Reset map orientation"]');
+        if (innerBtn) {
+            innerBtn.setAttribute("title", t.compass);
+        }
+    });
+
 }
-//MAKE GALLERY PICTURES APPEAR IN THE CENTER AND THE BACKGROUND IS GRAY AND NON ACTIVE
+
 
 

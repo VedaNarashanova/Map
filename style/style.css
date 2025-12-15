@@ -1,3 +1,6 @@
+main{
+    padding-bottom: 20px;
+}
 #top-wrapper{
     background-color: rgb(234,234,246);
     height: 80px;
@@ -34,11 +37,6 @@
     color: rgb(14,20,98);
 }
 
-
-
-
-
-
 #gallery-overlay {
     display: flex;       /* stays in the middle of screen */
     position: relative;
@@ -48,13 +46,7 @@
     align-items: center;   /* centers slider vertically + horizontally */
     z-index: 9999;
 }
-/*#gallery-overlay {*/
-/*    position: relative;*/
-/*    top: 0;*/
-/*    left: 0;*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*}*/
+
 #gallery-btn{
     border-radius: 20px;
     background-color: rgb(14,20,98);
@@ -123,9 +115,6 @@ img.displaySlide {
     background-color: #555;
 }
 
-
-
-
 #map{
     border-bottom: 3px solid rgb(14,20,98);
     width: 100%;
@@ -158,8 +147,8 @@ img.displaySlide {
 
 #kladilnici-table th:first-child,
 #kladilnici-table th:nth-child(2),
-#kladilnici-table th:nth-child(3),
-#kladilnici-table td:first-child{
+#kladilnici-table th:nth-child(3)
+{
     background-color: rgb(14,20,98);
     color: rgb(234,234,246);
 }
