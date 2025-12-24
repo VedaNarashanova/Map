@@ -9,6 +9,20 @@ function loadHTML(id, url) {
 // Load header and footer
 // loadHTML('header', 'header.html');
 
+// function applyWidgetTranslationOnLoad(lang) {
+//     const tryTranslate = () => {
+//         if (widgets && Object.keys(widgets).length > 0) {
+//             // Widgets exist, translate them
+//             translateWidgets(lang);
+//         } else {
+//             // Retry after 100ms
+//             setTimeout(tryTranslate, 100);
+//         }
+//     };
+//     tryTranslate();
+// }
+
+
 loadHTML('header', 'header.html').then(() => {
     const languageSelect = document.getElementById("translate");
     const currentFlagDiv = document.getElementById("current-flag");
@@ -21,38 +35,46 @@ loadHTML('header', 'header.html').then(() => {
     const savedLang = sessionStorage.getItem("selectedLanguage") || defaultLang;
     languageSelect.value = savedLang;
     translatePage(savedLang);
-    updateFlag(savedLang);
+    // updateFlag(savedLang);
+    requestAnimationFrame(() => updateFlag(savedLang));
     // translateWidgets(savedLang);
     // Update language while navigating
     languageSelect.addEventListener("change", () => {
         const lang = languageSelect.value;
         sessionStorage.setItem("selectedLanguage", lang);
         translatePage(lang);
-        // translateWidgets(lang)
+        translateWidgets(lang)
         updateFlag(lang);
+        // translatePrintWidget(lang)
         setTimeout(() => translateWidgets(lang), 700);
     });
     function updateFlag(lang) {
         currentFlagDiv.innerHTML = `<img src="${flagImages[lang]}" alt="${lang} flag" style="width:24px;height:16px;">`;
     }
+
 });
 
 
-    // const savedLang = localStorage.getItem("selectedLanguage") || "en";
-    // languageSelect.value = savedLang;
-    // translatePage(savedLang);
 
-    // Add event listener
-    // languageSelect.addEventListener("change", () => {
-    //     const lang = languageSelect.value;
-    //     localStorage.setItem("selectedLanguage", lang);
-    //     translatePage(lang);
-    // });
-// });
+loadHTML('footer', 'footer.html').then(() =>{
+    const languageSelect = document.getElementById("translate");
 
-loadHTML('footer', 'footer.html');
+    if (!languageSelect) return;
+    const defaultLang = "en";
 
+    // Check if sessionStorage has a language (user navigated between pages)
+    const savedLang = sessionStorage.getItem("selectedLanguage") || defaultLang;
+    languageSelect.value = savedLang;
+    translatePage(savedLang);
 
+    // Update language while navigating
+    languageSelect.addEventListener("change", () => {
+        const lang = languageSelect.value;
+        sessionStorage.setItem("selectedLanguage", lang);
+        translatePage(lang);
+
+    });
+});
 
 
 //Translation ------------------------------------------------------------------------
@@ -64,7 +86,6 @@ function translatePage(lang){
         // el.textContent = translations[lang][key];
     });
 
-    // Translate placeholders
     document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
         const key = el.getAttribute("data-i18n-placeholder");
         el.placeholder = translations[lang][key];
@@ -111,16 +132,53 @@ const translations={
         fullscreen: "Fullscreen",
         measurement: "Measurement",
         print: "Print",
-        elevation: "Elevation Profile",
+        elevation: "Elevation",
         zoomin:"Zoom in",
         zoomout:"Zoom out",
-        Footer:"If you have any problems, feel free to contact us at the phone number: 071/234567 or on social media:"
+        xyConversionOutput:"xy conversion output",
+        feature:"Select feature",
+        selectrectangle:"Select by rectangle",
+        lasso:"Select by lasso",
+        point:"Draw a point",
+        polyline:"Draw a polyline",
+        polygon:"Draw a polygon",
+        rectangle:"Draw a rectangle",
+        circle:"Draw a circle",
+        undo:"Undo",
+        redo:"Redo",
+        settings:"Settings",
+        Footer:"If you have any problems, feel free to contact us at the phone number: 071/234567 or on social media:",
+
+
+
+        print: "Print",
+        layout: "Design",
+        mapOnly: "Map only",
+        title: "Title",
+        selectTemplate: "Set template",
+        letterAnsiA_landscape: "Писмо ANSI A хоризонтално",
+        A3_landscape: "A3 хоризонтално",
+        PDF: "PDF",
+        JPG: "JPG",
+        exportBtn: "Извези",
+        advancedOptions: "Напредни опции",
+        exportedFiles: "Извезени датотеки",
+        fileNameLabel: "File name",
+        fileNamePlaceholder: "File name",
+
+        fileFormatPlaceholder: "Select format",
+
+
+        titleLabel:"Title",
+        titlePlaceholder:"Title of file",
+        templateLabel:"Template",
+        fileFormatLabel: "File format",
 
     },
     mk:{
         id:"ИД  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
         name:"Име  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
-        adress:"Адреса",
+        adress:"Адреса <i class=\"fas fa-arrow-up sort-arrow\"></i>",
         search_placeholder:"Пребарај според име",
         search: 'Пребарај <i class="fas fa-magnifying-glass"></i>',
         gallery:"Галерија  <i class=\"fas fa-images\"></i>",
@@ -160,7 +218,44 @@ const translations={
         elevation: "Елевиран профил",
         zoomin:"Зумирај",
         zoomout:"Одзумирај",
-        Footer:"Ако имате какви било проблеми, слободно контактирајте нè на телефонскиот број: 071/234567 или преку социјалните мрежи:"
+        xyConversionOutput:"xy излез за конверзија",
+        feature: "Избери објект",
+        selectrectangle: "Избери со правоаголник",
+        lasso: "Избери со ласо",
+        point: "Насликај точка",
+        polyline: "Насликај линија",
+        polygon: "Насликај полигонот",
+        rectangle: "Насликај правоаголник",
+        circle: "Насликај круг",
+        undo: "Поништи",
+        redo: "Повтори",
+        settings: "Подесувања",
+        Footer:"Ако имате какви било проблеми, слободно контактирајте нè на телефонскиот број: 071/234567 или преку социјалните мрежи:",
+
+
+
+
+        print: "Испринтај",
+        layout: "Дизајн",
+        mapOnly: "Само мапа",
+        title: "Наслов",
+        selectTemplate: "Избери шаблон",
+        letterAnsiA_landscape: "Писмо ANSI A хоризонтално",
+        A3_landscape: "A3 хоризонтално",
+        PDF: "PDF",
+        JPG: "JPG",
+        exportBtn: "Извези",
+        advancedOptions: "Напредни опции",
+        exportedFiles: "Извезени датотеки",
+        fileNameLabel: "Име на датотека",
+        fileNamePlaceholder: "Име на датотека",
+        fileFormatPlaceholder: "Избери формат",
+
+
+        titleLabel:"Наслов",
+        titlePlaceholder:"Наслов на датотека",
+        templateLabel:"Темплејт",
+        fileFormatLabel: "Формат на датотека",
     },
     sq: {
         id:"ID  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
@@ -205,8 +300,19 @@ const translations={
         elevation: "Profili i Lartësisë",
         zoomin:"Zmadho",
         zoomout:"Zvogëlo",
-        Footer:"Nëse keni ndonjë problem, mos hezitoni të na kontaktoni në numrin e telefonit: 071/234567 ose në rrjetet sociale:"
-
+        xyConversionOutput:"dalja e konvertimit xy",
+        feature: "Zgjidh veçorinë",
+        selectrectangle: "Zgjidh me drejtkëndësh",
+        lasso: "Zgjidh me lasso",
+        point: "Vizato një pikë",
+        polyline: "Vizato një linjë",
+        polygon: "Vizato një poligon",
+        rectangle: "Vizato një drejtkëndësh",
+        circle: "Vizato një rreth",
+        undo: "Anulo",
+        redo: "Rikthe",
+        settings: "Cilësimet",
+        Footer:"Nëse keni ndonjë problem, mos hezitoni të na kontaktoni në numrin e telefonit: 071/234567 ose në rrjetet sociale:",
     }
 }
 
