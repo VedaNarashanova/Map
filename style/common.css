@@ -1,8 +1,8 @@
 body {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* full viewport height */
-    margin: 0;          /* remove default margin */
+    min-height: 100vh;
+    margin: 0;
     font-family: Arial, sans-serif;
 }
 main{
@@ -42,6 +42,8 @@ header ul {
     display: flex;
     list-style: none;
     padding-left: 50px;
+    gap:30px;
+    margin-left: -40px;
 }
 header ul li {
     display: inline;
@@ -99,4 +101,10 @@ header i{
 .footer-links img {
     width: 30px;
     height: 30px;
+}
+
+
+.small-icon {
+    font-size: 18px !important;
+    vertical-align: middle;
 }

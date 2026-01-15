@@ -1,33 +1,19 @@
 function loadHTML(id, url) {
-    return fetch(url)
-        .then(response => response.text())
+    return fetch(url)//fetches the html file
+        .then(response => response.text())//then read the text
         .then(data => {
-            document.getElementById(id).innerHTML = data;
+            document.getElementById(id).innerHTML = data;//put the html inside the element with the given id
         })
         .catch(error => console.error(`Error loading ${url}:`, error));
 }
-// Load header and footer
-// loadHTML('header', 'header.html');
 
-// function applyWidgetTranslationOnLoad(lang) {
-//     const tryTranslate = () => {
-//         if (widgets && Object.keys(widgets).length > 0) {
-//             // Widgets exist, translate them
-//             translateWidgets(lang);
-//         } else {
-//             // Retry after 100ms
-//             setTimeout(tryTranslate, 100);
-//         }
-//     };
-//     tryTranslate();
-// }
 
 
 loadHTML('header', 'header.html').then(() => {
     const languageSelect = document.getElementById("translate");
     const currentFlagDiv = document.getElementById("current-flag");
 
-    if (!languageSelect || !currentFlagDiv) return;
+    if (!languageSelect || !currentFlagDiv) return; //stop the function if either is missing
 
     const defaultLang = "en";
 
@@ -38,14 +24,19 @@ loadHTML('header', 'header.html').then(() => {
     // updateFlag(savedLang);
     requestAnimationFrame(() => updateFlag(savedLang));
     // translateWidgets(savedLang);
-    // Update language while navigating
+    // translatePrintWidget(savedLang)
+
     languageSelect.addEventListener("change", () => {
         const lang = languageSelect.value;
         sessionStorage.setItem("selectedLanguage", lang);
         translatePage(lang);
         translateWidgets(lang)
+        translatePrintWidget(lang)
+        translateBookmarksWidget(lang)
+        // translateDistanceWidget(lang)
+        // translateMapOnlySection(lang)
+        // translatePrintWidgetSticky(lang)
         updateFlag(lang);
-        // translatePrintWidget(lang)
         setTimeout(() => translateWidgets(lang), 700);
     });
     function updateFlag(lang) {
@@ -82,7 +73,7 @@ function translatePage(lang){
     // Translate inner text
     document.querySelectorAll("[data-i18n]").forEach(el => {
         const key = el.getAttribute("data-i18n");
-        el.innerHTML = translations[lang][key]; // use innerHTML so icons stay
+        el.innerHTML = translations[lang][key]; // use innerHTML so icons stay, land-which language, key- which word
         // el.textContent = translations[lang][key];
     });
 
@@ -101,25 +92,15 @@ const translations={
         gallery:"Gallery  <i class=\"fas fa-images\"></i>",
         previous:"Previous <i class=\"fas fa-chevron-left\"></i>",
         next:"Next <i class=\"fas fa-chevron-right\"></i>",
-        Home:"Home <i class=\"fas fa-house\"></i>",
-        video:"Video  <i class=\"fas fa-video\"></i>",
-        contact:"Contact <i class=\"fas fa-envelope\"></i>",
+        Home: "Home <i class=\"fas fa-house small-icon\"></i>",
+        video: "Video <i class=\"fas fa-video small-icon\"></i>",
+        contact: "Contact <i class=\"fas fa-envelope small-icon\"></i>",
         read_more_policy:"Read more about our Privacy Policy",
         read_more_service:"Read more about our Terms of Service",
         read_more_contact:"If you have any question please Contact us",
         english:"English",
         macedonian:"Macedonian",
         albanian:"Albanian",
-        getInTouch:"Get in Touch",
-        your_name:"Your name",
-        your_email:"Your email",
-        your_message:"Your message",
-        submit:"Submit",
-        Adress:"Adress  <i class=\"fas fa-map-marker-alt\"></i>",
-        street:"Boulevard Saint Kliment Ohridski 58b/2-4 MK",
-        phone:"Phone Number <i class=\"fas fa-phone\"></i>",
-        hours:"Working Hours <i class=\"fas fa-clock\"></i>",
-        mon:"Mon-Fri: 9–17",
         pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
         excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
         export:"Export in:",
@@ -148,21 +129,22 @@ const translations={
         redo:"Redo",
         settings:"Settings",
         Footer:"If you have any problems, feel free to contact us at the phone number: 071/234567 or on social media:",
+        Footer2:"© 2025 Your Website Name. All rights reserved.",
+        epxand:"Expand",
 
 
 
-        print: "Print",
-        layout: "Design",
+        layout: "Layout",
         mapOnly: "Map only",
         title: "Title",
         selectTemplate: "Set template",
-        letterAnsiA_landscape: "Писмо ANSI A хоризонтално",
-        A3_landscape: "A3 хоризонтално",
-        PDF: "PDF",
-        JPG: "JPG",
+        // letterAnsiA_landscape: "Писмо ANSI A хоризонтално",
+        // A3_landscape: "A3 хоризонтално",
+        // PDF: "PDF",
+        // JPG: "JPG",
         exportBtn: "Извези",
-        advancedOptions: "Напредни опции",
-        exportedFiles: "Извезени датотеки",
+        advancedOptions: "Advanced options",
+        exportedFiles: "Exported files",
         fileNameLabel: "File name",
         fileNamePlaceholder: "File name",
 
@@ -173,6 +155,33 @@ const translations={
         titlePlaceholder:"Title of file",
         templateLabel:"Template",
         fileFormatLabel: "File format",
+        selectFormat: "Select format",
+        exportedFilesHint: "Your exported files will appear here.",
+
+
+        width: "Width",
+        height: "Height",
+
+        bookmarksTitle: "Bookmarks",
+        collapse: "Collapse",
+        options: "Options",
+        noBookmarks: "No bookmarks",
+        noBookmarksDesc: "Add bookmarks to your map and they will appear here.",
+        addBookmark: "Add bookmark",
+        titleBookmark: "Title",
+        enterTitle: "Enter a title",
+        cancel: "Cancel",
+        add: "Add",
+
+
+        hint: "Start to measure by clicking in the map to place your first point",
+        unit: "Unit",
+        distance: "Distance",
+        newMeasurement: "New measurement",
+        units: {
+            meters: "Meters",
+            kilometers: "Kilometers"
+        }
 
     },
     mk:{
@@ -184,25 +193,15 @@ const translations={
         gallery:"Галерија  <i class=\"fas fa-images\"></i>",
         previous:"<i class=\"fas fa-chevron-left\"></i> Претходно",
         next:"Следно <i class=\"fas fa-chevron-right\"></i>",
-        Home:"Дома <i class=\"fas fa-house\"></i>",
-        video:"Видео  <i class=\"fas fa-video\"></i>",
-        contact:"Контакт  <i class=\"fas fa-envelope\"></i>",
+        Home: 'Дома <i class="fas fa-house small-icon"></i>',
+        video: 'Видео <i class="fas fa-video small-icon"></i>',
+        contact: 'Контакт <i class="fas fa-envelope small-icon"></i>',
         read_more_policy:"Прочитајте повеже за нашата полиса за приватност",
         read_more_service:"Прочитајте повеже за нашите услови за користење.",
         read_more_contact:"Ако имаш прашања, ве замолуваме исконтактирајте не.",
         english:"Англиски",
         macedonian:"Македонски",
         albanian:"Албански",
-        getInTouch:"Стапете во контакт",
-        your_name:"Вашето има",
-        your_email:"Вашиот мејл",
-        your_message:"Вашата порака",
-        submit:"Потврди",
-        Adress:"Адреса <i class=\"fas fa-map-marker-alt\"></i>",
-        street:"Булевар Свети Климент Охридски 58б/2-4 MK  ",
-        phone:"Телефонски Број <i class=\"fas fa-phone\"></i>",
-        hours:"Работни Часови <i class=\"fas fa-clock\"></i>",
-        mon:"Пон-Пет: 9–17",
         pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
         excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
         export:"Извези во:",
@@ -231,12 +230,11 @@ const translations={
         redo: "Повтори",
         settings: "Подесувања",
         Footer:"Ако имате какви било проблеми, слободно контактирајте нè на телефонскиот број: 071/234567 или преку социјалните мрежи:",
+        Footer2:"© 2025 Име на вашата веб-страница. Сите права се задржани.",
+        epxand:"Прошири",
 
 
-
-
-        print: "Испринтај",
-        layout: "Дизајн",
+        layout: "Распоред",
         mapOnly: "Само мапа",
         title: "Наслов",
         selectTemplate: "Избери шаблон",
@@ -256,6 +254,34 @@ const translations={
         titlePlaceholder:"Наслов на датотека",
         templateLabel:"Темплејт",
         fileFormatLabel: "Формат на датотека",
+        selectFormat: "Избери формат",
+        exportedFilesHint: "Тука ќе се прикажат извезените датотеки.",
+        width:"Ширина",
+        height:"Висина",
+
+        bookmarksTitle: "Обележувачи",
+        collapse: "Собери",
+        options: "Опции",
+        noBookmarks: "Нема обележувачи",
+        noBookmarksDesc: "Додајте обележувачи на мапата и тие ќе се појават тука.",
+        addBookmark: "Додај обележувач",
+        titleBookmark: "Наслов",
+        enterTitle: "Внесете наслов",
+        cancel: "Откажи",
+        add: "Додади",
+
+
+
+        hint: "Започнете со мерење со кликнување на мапата за да ја поставите првата точка",
+        unit: "Единица",
+        distance: "Должина",
+        newMeasurement: "Ново мерење",
+        units: {
+            meters: "Метри",
+            kilometers: "Километри"
+        }
+
+
     },
     sq: {
         id:"ID  <i class=\"fas fa-arrow-up sort-arrow\"></i>",
@@ -266,25 +292,15 @@ const translations={
         gallery:"Galeri  <i class=\"fas fa-images\"></i>",
         previous:"Prapa <i class=\"fas fa-chevron-left\"></i>",
         next:"Para <i class=\"fas fa-chevron-right\"></i>",
-        Home:"Ballina <i class=\"fas fa-house\"></i>",
-        video:"Video  <i class=\"fas fa-video\"></i>",
-        contact:"Kontakt <i class=\"fas fa-envelope\"></i>",
+        Home: 'Kryefaqja <i class="fas fa-house small-icon"></i>',
+        video: 'Video <i class="fas fa-video small-icon"></i>',
+        contact: 'Kontakt <i class="fas fa-envelope small-icon"></i>',
         read_more_policy:"Lexo më shumë rreth Politikës së Privatësisë",
         read_more_service:"Lexo më shumë rreth Kushteve të Shërbimit",
         read_more_contact:"Nëse keni ndonjë pyetje, ju lutem na kontaktoni",
         english:"Anglisht",
         macedonian:"Maqedonisht",
         albanian:"Shqip",
-        getInTouch:"Na kontaktoni",
-        your_name:"Emri juaj",
-        your_email:"Email-i juaj",
-        your_message:"Mesazhi juaj",
-        submit:"Dërgo",
-        Adress:"Adresa <i class=\"fas fa-map-marker-alt\"></i>",
-        street:"Bulevardi Shën Kliment Ohrit 58b/2-4 MK  ",
-        phone:"Numri i telefonit <i class=\"fas fa-phone\"></i>",
-        hours:"Orari i punës <i class=\"fas fa-clock\"></i>",
-        mon:"Hën–Pre: 9–17",
         pdf:"PDF <i class=\"fas fa-file-pdf\"></i>",
         excel:"EXCEL <i class=\"fas fa-file-excel\"></i>",
         export:"Eksporto në:",
@@ -313,6 +329,52 @@ const translations={
         redo: "Rikthe",
         settings: "Cilësimet",
         Footer:"Nëse keni ndonjë problem, mos hezitoni të na kontaktoni në numrin e telefonit: 071/234567 ose në rrjetet sociale:",
+        Footer2:"© 2025 Emri i faqes suaj të internetit. Të gjitha të drejtat e rezervuara.",
+        layout: "Paraqitja",
+        mapOnly: "Vetëm harta",
+        title:"titull",
+        titleLabel: "Titulli",
+        titlePlaceholder: "Titulli i skedarit",
+
+        templateLabel: "Shabllon",
+        selectTemplate: "Zgjidh shabllon",
+
+        fileNameLabel: "Emri i skedarit",
+        fileNamePlaceholder: "Emri i skedarit",
+
+        fileFormatLabel: "Formati i skedarit",
+        selectFormat: "Zgjidh format",
+        fileFormatPlaceholder: "Zgjidh format",
+
+        advancedOptions: "Opsione të avancuara",
+
+        exportedFiles: "Skedarët e eksportuar",
+        exportedFilesHint: "Skedarët e eksportuar do të shfaqen këtu.",
+
+        width: "Gjerësia",
+        height: "Lartësia",
+
+        bookmarksTitle: "Faqerojtës",
+        collapse: "Mbyll",
+        options: "Opsione",
+        noBookmarks: "Nuk ka faqerojtës",
+        noBookmarksDesc: "Shtoni faqerojtës në hartë dhe ato do të shfaqen këtu.",
+        addBookmark: "Shto faqerojtës",
+        titleBookmark: "Titull",
+        enterTitle: "Shkruani një titull",
+        cancel: "Anulo",
+        add: "Shto",
+
+
+
+        hint: "Filloni matjen duke klikuar në hartë për të vendosur pikën tuaj të parë",
+        unit: "Njësia",
+        distance: "Distanca",
+        newMeasurement: "Matje e re",
+        units: {
+            meters: "Metra",
+            kilometers: "Kilometra"
+        }
     }
 }
 

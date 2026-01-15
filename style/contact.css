@@ -107,8 +107,8 @@ textarea.contact-inputs {
 /*}*/
 .contact-info {
     margin-top: 3rem;
-    display: flex;          /* use flex instead of grid */
-    gap: 20px;              /* space between cards */
+    display: flex;
+    gap: 20px;
     /*justify-content: flex-start; !* align cards to the left *!*/
     flex-wrap: nowrap;        /* wrap cards to next line if needed */
     justify-content: center;
@@ -132,7 +132,7 @@ textarea.contact-inputs {
     font-size: 1rem;
     color: #203a43;
     margin-bottom: 0.5rem;
-    height: 55px; /* fixed height to make all h3 the same */
+    height: 55px;
 }
 .info-block h3 i{
     display: block;

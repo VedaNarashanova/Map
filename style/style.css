@@ -38,12 +38,12 @@ main{
 }
 
 #gallery-overlay {
-    display: flex;       /* stays in the middle of screen */
+    display: flex;
     position: relative;
     top: 0;
     right: 6%;
     justify-content: center;
-    align-items: center;   /* centers slider vertically + horizontally */
+    align-items: center;
     z-index: 9999;
 }
 
@@ -81,7 +81,7 @@ main{
     height: 600px;
     justify-content: center;
     align-items: center;
-    flex-direction: column; /* stack image and buttons vertically */
+    flex-direction: column;
     background-color: rgb(14,20,98);
     display: none;
     padding: 50px 30px 10px 30px;
@@ -93,6 +93,7 @@ main{
     height: 550px;
     border: 2px solid  rgb(234,234,246);
     /*object-fit: contain;*/
+
 }
 img.displaySlide {
     display: block;
@@ -133,7 +134,7 @@ img.displaySlide {
     border-spacing: 2px;
     table-layout: fixed;
     margin-top: 20px;
-    overflow: hidden;          /* ensure inner cells don’t overflow corners */
+    overflow: hidden;
 }
 #kladilnici-table th, #kladilnici-table td{
     border: 1px solid rgb(14,20,98);
@@ -177,10 +178,10 @@ img.displaySlide {
 }
 
 #export-container {
-    display: flex;                /* use flexbox */
-    align-items: center;          /* vertically center items */
-    justify-content: center;      /* horizontally center items inside container */
-    gap: 5px;                     /* space between button and select */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
     border-radius: 50px;
     background-color: rgb(14,20,98);
     color: white;

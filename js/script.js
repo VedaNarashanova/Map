@@ -2,7 +2,7 @@ let view;
 let widgets={};
 let SymbolDrawing;
 let graphicsLayer
-const SYMBOL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1?f=pjson"//get the first layer and turn it into json
+const SYMBOL="https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1?f=pjson"//get the first layer and turn it into pretty 2202json
 //load the symbols ----------------------------------------------------------------
 async function loadSymbol(){
     const response2=await fetch(SYMBOL);
@@ -17,7 +17,8 @@ let savedLang = sessionStorage.getItem("selectedLanguage") || "en";
 // let mapReady = false;
 
 //load the map ---------------------------------------------------------------------
-loadSymbol().then(() =>{require([
+loadSymbol().then(() =>{
+    require([
     "esri/Map",
     "esri/views/MapView",
     "esri/layers/GraphicsLayer",// a layer added to the map that holds the points of the kladilnici
@@ -61,7 +62,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     });
 
 
-    const featureLayer = new FeatureLayer({
+    const featureLayer = new FeatureLayer({ //za legenda i popups
         url: "https://app.gdi.mk/arcgis/rest/services/Studenti/Kladilnici_Kazina/MapServer/1",
         outFields: ["*"],
         // title: "Kladilnici",
@@ -85,10 +86,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
 
     map.add(featureLayer);
 
-    // map.add(featureLayer);
 
-
-//creating a graphics layer
     graphicsLayer = new GraphicsLayer();
     graphicsLayer.renderer = {
         type: "simple",
@@ -102,6 +100,25 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     };
     graphicsLayer.title = "kladilnici";
     // map.add(graphicsLayer);
+
+//Print
+    const print = new Print({
+        view: view,
+        printServiceUrl:
+            "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+    });
+    const printExpand = new Expand({
+        view: view,
+        content: print,
+        expandTooltip: "Print",
+    })
+    view.ui.add(printExpand, "top-left")
+    print.on("print", function (event) {
+        printExpand.expanded = false
+    })
+    widgets.printExpand = printExpand;
+    let printTranslateTimeout = null;
+
 
 
 //bookmarks
@@ -137,6 +154,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     view.ui.add(home, "top-left")
     widgets.home = home;
 
+
 //layerList
     const layerList = new LayerList({
         view,
@@ -144,10 +162,10 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
             // Only show the featureLayer in the list
             if (event.item.layer === featureLayer) {
                 event.item.title = "Kladilnici"; // rename
-                event.item.actionsSections = [];
+                // event.item.actionsSections = [];
 
-                // Optional: sync graphicsLayer visibility with featureLayer
-                featureLayer.watch("visible", visible => graphicsLayer.visible = visible);
+                // sync graphicsLayer visibility with featureLayer
+                // featureLayer.watch("visible", visible => graphicsLayer.visible = visible);
             } else {
                 // Remove other layers from the list completely
                 event.item.panel = null;   // hides the expand arrow
@@ -183,7 +201,6 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
 
 
 
-
 //my location
     const locateWidget = new Locate({
         view: view
@@ -208,26 +225,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     widgets.MeasurementExpand = MeasurementExpand
 
 
-//Print
-    const print = new Print({
-        view: view,
-        // specify your own print service
-        printServiceUrl:
-            "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
-    });
-    const printExpand = new Expand({
-        view: view,
-        content: print,
-        expandTooltip: "Print",
-    })
-    view.ui.add(printExpand, "top-left")
-    print.on("print", function (event) {
-        printExpand.expanded = false
-    })
-    widgets.printExpand = printExpand;
-
-
-//full screen
+//Full screen
     const fullscreen = new Fullscreen({
         view: view
     });
@@ -275,7 +273,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     widgets.ccWidget = ccWidget
 
 
-//sketch
+//Sketch
     let sketch = new Sketch({
         layer: graphicsLayer,
         view: view,
@@ -290,35 +288,6 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
     view.ui.add(sketch, "top-right");
 
 
-    // view.when(() => {
-    //     mapReady = true;
-    //     applyLanguage(sessionStorage.getItem("selectedLanguage") || "en");
-    // });
-
-// Listen for clicks on the map view
-//     view.on("click", event => {
-//         // Perform a hit test to see if the click hits any graphics
-//         view.hitTest(event).then(response => {
-//             // Find the first graphic in our graphicsLayer that was clicked
-//             const graphic = response.results
-//                 .find(r => r.graphic?.layer === graphicsLayer)  // check if the result has a graphic in our layer
-//                 ?.graphic;                                      // get the actual Graphic object
-//
-//             // If a graphic was clicked
-//             if (graphic) {
-//                 // Open a popup at the clicked location using the graphic's popupTemplate
-//                 view.openPopup({
-//                     features: [graphic],      // the clicked graphic to show info for
-//                     location: event.mapPoint  // where on the map to open the popup
-//                 });
-//             }
-//         });
-//     });
-
-    // console.log(graphicsLayer.renderer);
-    // map.add(graphicsLayer);
-
-
 
 
 
@@ -331,7 +300,7 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
             // console.log(geometry);
 
             const { x, y } = feature.geometry;
-            const { lat, lon } = mercatorToLatLon(x, y);
+            const { lat, lon } = convertToLatLon(x, y);
 
             const pointGraphic=new Graphic({
                 geometry:{
@@ -340,8 +309,8 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
                     latitude: lat
                 },
                 symbol: {
-                    type: "picture-marker",       //  important
-                    url: "data:image/png;base64," + SymbolDrawing.imageData, //  important
+                    type: "picture-marker",
+                    url: "data:image/png;base64," + SymbolDrawing.imageData,
                     width: SymbolDrawing.width,
                     height: SymbolDrawing.height,
                     angle: SymbolDrawing.angle || 0,
@@ -363,13 +332,6 @@ function(Map, MapView,GraphicsLayer,Graphic,Bookmarks, Expand,Compass, Home, Lay
 
     }
     loadAndDrawKladilnici();
-
-    // console.log(graphicsLayer.graphics.items[0].symbol);
-    // view.when(() => {
-    //     const legendVM = view.ui.find("legend")?.viewModel;
-    //     // console.log(legendVM?.activeLayerInfos);
-    // });
-
 });
 });
 
@@ -383,12 +345,13 @@ const pageSize = 10;  // 10 items per page
 let filteredKladilnici=[];
 
 async function loadKladilnici(){
+
     try{
         const response=await fetch(LAYER_URL);
         const data=await response.json();
         kladilnici = data.features.map(feature =>{
             const {x,y}=feature.geometry;
-            const {lat,lon} = mercatorToLatLon(x,y)
+            const {lat,lon} = convertToLatLon(x,y)
 
             return{
                 id:  feature.attributes.objectid,
@@ -398,6 +361,7 @@ async function loadKladilnici(){
                 lon,
             }
         })
+        // .filter(feature => feature.id%2===0) za samo parni
         renderPage();
     }
     catch (error){
@@ -431,22 +395,13 @@ function renderPage(){
                 zoom: 17
             })
         })
-        // row.querySelector(".bookmark-btn").addEventListener("clicl", (event) =>{
-        //     event.stopPropagation() //prevent row click zoom
-        //     bookmarks.addBookmark({
-        //         name:item.name,
-        //         extent:view.extent.clone()
-        //     })
-        //     alert(`${item.name} added to bookmarks!`);
-        // })
-
         tableBody.appendChild(row)
     });
 
     //update page info
     const pageInfo = document.getElementById("page-info");
     // const totalPages=Math.ceil(kladilnici.length/pageSize);
-    const totalPages=Math.ceil(source.length/pageSize);
+    const totalPages=Math.ceil(source.length/pageSize);  //round it up for how many pages it will need
     pageInfo.textContent=`Page ${currentPage} of ${totalPages}`;
     document.getElementById("prev").disabled=currentPage===1;
     document.getElementById("next").disabled=currentPage===totalPages;
@@ -550,9 +505,8 @@ document.querySelectorAll("#kladilnici-table th").forEach(th => {
 
 
 
-
 //math for converting coordinates into longtitude and latitude  ------------------------------------------------------------------
-function mercatorToLatLon(x, y) {
+function convertToLatLon(x, y) {
     const R = 6378137; // radius of Earth in meters
     const lon = x / R * (180 / Math.PI);
     const lat = (2 * Math.atan(Math.exp(y / R)) - Math.PI/2) * (180 / Math.PI);
@@ -602,12 +556,8 @@ function closeGallery() {
 }
 
 //Exporting in PDF---------------------------------------------------------------------------------------
-//Exporting in PDF (updated to export all rows, not just current page)
 document.getElementById("exportPDF-btn").addEventListener("click", () => {
-    // 1. Use filtered data if search is active, otherwise use full dataset
     const source = filteredKladilnici.length > 0 ? filteredKladilnici : kladilnici;
-
-    // 2. Build the table HTML dynamically from all data
     let tableHTML = `
         <table>
             <thead>
@@ -632,7 +582,7 @@ document.getElementById("exportPDF-btn").addEventListener("click", () => {
 
     tableHTML += `</tbody></table>`;
 
-    // 3. Open a new window and write the table HTML into it
+    // Open a new window and write the table HTML into it
     const printWindow = window.open("", "", "width=800,height=600");
     printWindow.document.write(`
         <html>
@@ -642,7 +592,7 @@ document.getElementById("exportPDF-btn").addEventListener("click", () => {
                     table { border-collapse: collapse; width: 100%; }
                     th, td { border: 1px solid #000; padding: 5px; text-align: left; }
                     th { background-color: #eaeaf6; }
-                    /* Optional: Add page breaks for long tables */
+                    
                     @media print {
                         table { page-break-after: auto; }
                         tr    { page-break-inside: avoid; page-break-after: auto; }
@@ -659,18 +609,13 @@ document.getElementById("exportPDF-btn").addEventListener("click", () => {
         </html>
     `);
 
-    // 4. Close document, focus window, and open print dialog
     printWindow.document.close();
     printWindow.focus();
     printWindow.print();
 });
 //Export in Excel --------------------------------------------------------------------
-// Export in Excel (updated to export all rows, not just current page)
 document.getElementById("exportEXCEL-btn").addEventListener("click", () => {
-    // 1. Use filtered data if a search is active, otherwise use full dataset
     const source = filteredKladilnici.length > 0 ? filteredKladilnici : kladilnici;
-
-    // 2. Build the table HTML dynamically from all data
     let tableHTML = `
         <table>
             <thead>
@@ -695,7 +640,7 @@ document.getElementById("exportEXCEL-btn").addEventListener("click", () => {
 
     tableHTML += `</tbody></table>`;
 
-    // 3. Create a Blob and download as Excel
+    // Create a Blob and download as Excel
     const blob = new Blob([tableHTML], { type: "application/vnd.ms-excel" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -740,81 +685,6 @@ window.addEventListener("load",cookieMessage)
 
 //TRANSLATE WIDGETS ---------------------------------------------------------------------------
 
-// function translateWidgets(lang) {
-//     const t = translations[lang];
-//
-//     // Compass
-//     if (widgets.compass) {
-//         widgets.compass.label = t.compass;
-//         widgets.compass.tooltip = t.compass;
-//     }
-//
-//     // Home
-//     if (widgets.home) {
-//         widgets.home.label = t.home;
-//         widgets.home.tooltip = t.home;
-//     }
-//
-//     // Bookmarks (Expand)
-//     if (widgets.bookmarksExpand) {
-//         widgets.bookmarksExpand.expandTooltip = t.bookmarks;
-//     }
-//
-//     // Basemap
-//     if (widgets.baseMapExpand) {
-//         widgets.baseMapExpand.expandTooltip = t.basemap;
-//     }
-//
-//     // Layer visibility
-//     if (widgets.LayerList) {
-//         widgets.LayerList.expandTooltip = t.visibility;
-//     }
-//
-//     // Locate
-//     if (widgets.locate) {
-//         widgets.locate.label = t.locate;
-//         widgets.locate.tooltip = t.locate;
-//     }
-//
-//     // Fullscreen
-//     if (widgets.fullscreen) {
-//         widgets.fullscreen.label = t.fullscreen;
-//         widgets.fullscreen.tooltip = t.fullscreen;
-//     }
-//
-//     // Measurement
-//     if (widgets.MeasurementExpand) {
-//         widgets.MeasurementExpand.expandTooltip = t.measurement;
-//     }
-//
-//     // Print
-//     if (widgets.printExpand) {
-//         widgets.printExpand.expandTooltip = t.print;
-//     }
-// }
-// function translateShadowWidget(widget, translation) {
-//     if (!widget) return;
-//
-//     // Wait until the Shadow DOM is ready
-//     const tryUpdate = () => {
-//         const shadowBtn = widget.container?.querySelector('calcite-button')?.shadowRoot?.querySelector('button');
-//         if (shadowBtn) {
-//             shadowBtn.setAttribute("title", translation);
-//         } else {
-//             // Retry until the element exists
-//             setTimeout(tryUpdate, 100);
-//         }
-//     };
-//     tryUpdate();
-// }
-//
-// // Example usage
-// translateShadowWidget(widgets.compass, translations[lang].compass);
-// translateShadowWidget(widgets.home, translations[lang].home);
-// translateShadowWidget(widgets.locate, translations[lang].locate);
-// translateShadowWidget(widgets.fullscreen, translations[lang].fullscreen);
-
-
 
 function translateWidgets(lang){
     const t=translations[lang];
@@ -830,6 +700,9 @@ function translateWidgets(lang){
     document.querySelector('[title="Print"]')?.setAttribute("title",t.print)
     document.querySelector('[title="Measurement"]')?.setAttribute("title",t.measurement)
     document.querySelector('[title="Elevation"]')?.setAttribute("title",t.elevation)
+    document.querySelector('[title="Collapse"]')?.setAttribute("title",t.collapse)
+    document.querySelector('[title="Expand"]')?.setAttribute("title",t.epxand)
+
 
 
     document.querySelector('[title="Зумирај"]')?.setAttribute("title",t.zoomin)
@@ -844,6 +717,8 @@ function translateWidgets(lang){
     document.querySelector('[title="Испринтај"]')?.setAttribute("title",t.print)
     document.querySelector('[title="Мерки"]')?.setAttribute("title",t.measurement)
     document.querySelector('[title="Елевиран профил"]')?.setAttribute("title",t.elevation)
+    document.querySelector('[title="Смали"]')?.setAttribute("title",t.collapse)
+    document.querySelector('[title="Прошири"]')?.setAttribute("title",t.epxand)
 
     document.querySelector('[title="Home"]')?.setAttribute("title",t.home)
     document.querySelector('[title="Compass"]')?.setAttribute("title",t.compass)
@@ -913,132 +788,163 @@ function translateWidgets(lang){
 
 }
 
-//
-// function translatePrintWidget(lang) {
-//     const t = translations[lang];
-//
-//     // Translate Print header
-//     const printHeader = document.querySelector(".esri-print__header-title");
-//     if (printHeader) printHeader.textContent = t.print;
-//
-//     // Translate Layout / Map only tabs
-//     const layoutTab = document.querySelector(".esri-print__layout-tab[data-tab-id='layoutTab']");
-//     if (layoutTab) layoutTab.textContent = t.layout;
-//     const mapOnlyTab = document.querySelector(".esri-print__layout-tab[data-tab-id='mapOnlyTab']");
-//     if (mapOnlyTab) mapOnlyTab.textContent = t.mapOnly;
-//
-//
-//     const layoutSection = document.querySelector(".esri-print__layout-section");
-//
-//     if (!layoutSection) return;
-//
-//     // --- Title label and input ---
-//     const titleLabel = layoutSection.querySelector("calcite-label:has(calcite-input)");
-//     if (titleLabel && titleLabel.shadowRoot) {
-//         const container = titleLabel.shadowRoot.querySelector(".container");
-//         if (container) container.textContent = t.titleLabel; // from translations
-//     }
-//     const titleInput = layoutSection.querySelector("calcite-input");
-//     if (titleInput && titleInput.shadowRoot) {
-//         const input = titleInput.shadowRoot.querySelector("input");
-//         if (input) input.placeholder = t.titlePlaceholder; // from translations
-//     }
-//
-//     // --- Template label
-//     const templateLabel = layoutSection.querySelector("calcite-label calcite-combobox");
-//     if (templateLabel && templateLabel.shadowRoot) {
-//         const label = templateLabel.shadowRoot.querySelector(".label");
-//         if (label) label.textContent = t.templateLabel; // from translations
-//     }
-//
-//     // --- File format label and combobox ---
-//     const formatLabel = layoutSection.querySelectorAll("calcite-label calcite-combobox")[1];
-//     if (formatLabel && formatLabel.shadowRoot) {
-//         const label = formatLabel.shadowRoot.querySelector(".label");
-//         if (label) label.textContent = t.fileFormatLabel;
-//     }
-//
-//     // // Translate Title label
-//     // const titleLabel = document.querySelector("calcite-label:has(calcite-input)");
-//     // if (titleLabel) {
-//     //     const shadow = titleLabel.shadowRoot;
-//     //     if (shadow) {
-//     //         shadow.querySelector("slot").parentNode.textContent = t.title;
-//     //     } else {
-//     //         titleLabel.childNodes[0].textContent = t.title;
-//     //     }
-//     // }
-//     //
-//     // // Translate Template combobox
-//     // const templateCombo = document.querySelector("calcite-label calcite-combobox");
-//     // if (templateCombo) {
-//     //     const shadow = templateCombo.shadowRoot;
-//     //     if (shadow) {
-//     //         const label = shadow.querySelector(".label");
-//     //         if (label) label.textContent = t.selectTemplate; // додај го во translations.mk
-//     //     }
-//     //     // Translate combobox items
-//     //     templateCombo.querySelectorAll("calcite-combobox-item").forEach(item => {
-//     //         const text = item.getAttribute("text-label");
-//     //         if (text === "Letter ANSI A landscape") item.textContent = t.letterAnsiA_landscape;
-//     //         if (text === "A3 landscape") item.textContent = t.A3_landscape;
-//     //         // и така за сите опции
-//     //     });
-//     // }
-//     //
-//     // // Translate File format combobox
-//     // const formatCombo = document.querySelectorAll("calcite-label calcite-combobox")[1];
-//     // if (formatCombo) {
-//     //     formatCombo.querySelectorAll("calcite-combobox-item").forEach(item => {
-//     //         const text = item.getAttribute("text-label");
-//     //         if (text === "PDF") item.textContent = t.PDF;
-//     //         if (text === "JPG") item.textContent = t.JPG;
-//     //         // и така за сите формати
-//     //     });
-//     // }
-//     //
-//     // // Translate buttons
-//     // const exportButton = document.querySelector(".esri-print__export-button");
-//     // if (exportButton) exportButton.textContent = t.exportBtn;
-//     //
-//     // const advancedButton = document.querySelector(".esri-print__advanced-options-button-title");
-//     // if (advancedButton) advancedButton.textContent = t.advancedOptions;
-//     //
-//     // const exportedFiles = document.querySelector(".esri-print__export-title");
-//     // if (exportedFiles) exportedFiles.textContent = t.exportedFiles;
-//     //
-//     // //------------------------------------------------------------------------------------------------------------------
-//     //
-//     // const mapOnlySection = document.querySelector(".esri-print__map-only-section");
-//     // if (mapOnlySection) {
-//     //
-//     //     // File name label
-//     //     const fileNameLabel = mapOnlySection.querySelector("calcite-label");
-//     //     if (fileNameLabel && fileNameLabel.shadowRoot) {
-//     //         const container = fileNameLabel.shadowRoot.querySelector(".container");
-//     //         if (container) container.innerHTML = t.fileNameLabel; // <- from translations
-//     //     }
-//     //
-//     //     // File name input placeholder
-//     //     const fileNameInput = mapOnlySection.querySelector("calcite-input");
-//     //     if (fileNameInput && fileNameInput.shadowRoot) {
-//     //         const input = fileNameInput.shadowRoot.querySelector("input");
-//     //         if (input) input.placeholder = t.fileNamePlaceholder; // <- from translations
-//     //     }
-//     //
-//     //     // File format label
-//     //     const fileFormatLabel = mapOnlySection.querySelectorAll("calcite-label")[1];
-//     //     if (fileFormatLabel && fileFormatLabel.shadowRoot) {
-//     //         const container = fileFormatLabel.shadowRoot.querySelector(".container");
-//     //         if (container) container.innerHTML = t.fileFormatLabel; // <- from translations
-//     //     }
-//     //
-//     //     // File format combobox placeholder
-//     //     const fileFormatCombobox = mapOnlySection.querySelector("calcite-combobox");
-//     //     if (fileFormatCombobox && fileFormatCombobox.shadowRoot) {
-//     //         const input = fileFormatCombobox.shadowRoot.querySelector("input.input--single");
-//     //         if (input) input.placeholder = t.fileFormatPlaceholder; // <- from translations
-//     //     }
-//     // }
-// }
+
+
+
+
+
+function translatePrintWidget(lang) {
+    const t = translations[lang];
+
+    //Header
+    const printHeader = document.querySelector(".esri-print__header-title");
+    if (printHeader) printHeader.textContent = t.print;
+
+    // Tabs
+    const layoutTab = document.querySelector("[data-tab-id='layoutTab']");
+    if (layoutTab) layoutTab.textContent = t.layout;
+
+    const mapOnlyTab = document.querySelector("[data-tab-id='mapOnlyTab']");
+    if (mapOnlyTab) mapOnlyTab.textContent = t.mapOnly;
+
+
+    // Layout / Design Section
+    const layoutSection = document.querySelector(".esri-print__layout-section");
+    if (layoutSection) {
+        // Reuse your existing logic for Layout section here
+        translateCalciteLabel(layoutSection, 0, t.titleLabel, t.titlePlaceholder);       // Title
+        translateCalciteLabel(layoutSection, 1, t.templateLabel, t.selectTemplate);      // Template
+        translateCalciteLabel(layoutSection, 2, t.fileFormatLabel, t.selectFormat);       // File Format
+    }
+
+
+    // Map Only Section
+    const mapOnlySection = document.querySelector(".esri-print__map-only-section");
+    if (mapOnlySection) {
+        translateCalciteLabel(mapOnlySection, 0, t.fileNameLabel, t.fileNameLabel);    // File name
+        translateCalciteLabel(mapOnlySection, 1, t.fileFormatLabel, t.selectFormat);    // File format
+
+        // Width and Height
+        const widthLabel = mapOnlySection.querySelector(".esri-print__width-container label");
+        if (widthLabel) widthLabel.childNodes[0].textContent = t.width;
+
+        const heightLabel = mapOnlySection.querySelector(".esri-print__height-container label");
+        if (heightLabel) heightLabel.childNodes[0].textContent = t.height;
+    }
+
+
+    //Advanced / Export Section
+    const adv = document.querySelector(".esri-print__advanced-options-button-title");
+    if (adv) adv.textContent = t.advancedOptions;
+
+    const exportBtn = document.querySelector(".esri-print__export-button");
+    if (exportBtn) exportBtn.textContent = t.export;
+
+    const exportedTitle = document.querySelector(".esri-print__export-title");
+    if (exportedTitle) exportedTitle.textContent = t.exportedFiles;
+
+    const exportedText = document.querySelector(".esri-print__export-panel-container div div");
+    if (exportedText) exportedText.textContent = t.exportedFilesHint;
+}
+
+
+// Helper to translate Calcite labels
+function translateCalciteLabel(section, index, labelText, placeholderText) {
+    const label = section.querySelectorAll("calcite-label")[index];
+    if (!label) return;
+
+    // Light DOM: visible label
+    label.childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) node.textContent = labelText;
+    });
+
+    // Shadow DOM: input placeholder
+    const input = label.querySelector("calcite-input, calcite-combobox")?.shadowRoot?.querySelector("input");
+    if (input && placeholderText) input.placeholder = placeholderText;
+}
+
+
+function translateBookmarksWidget(lang) {
+    const t = translations[lang];
+    const container = document.querySelector(".esri-bookmarks");
+    if (!container || !t) return;
+
+    // Collapse button
+    container
+        .closest(".esri-expand")
+        ?.querySelectorAll('calcite-button[title]')
+        .forEach(btn => {
+            if (btn.title === "Collapse") {
+                btn.title = t.collapse;
+                btn.setAttribute("aria-label", t.collapse);
+            }
+        });
+
+    //options
+    container.querySelectorAll(".text-container").forEach(el => {
+        if (el.textContent.trim() === "Options") {
+            el.textContent = t.options;
+        }
+    });
+
+    // Empty state title
+    const noBookmarksTitle = container.querySelector(
+        ".esri-bookmarks__no-bookmarks-heading"
+    );
+    if (noBookmarksTitle) {
+        noBookmarksTitle.textContent = t.noBookmarks;
+    }
+
+    // Empty state description
+    const noBookmarksDesc = container.querySelector(
+        ".esri-bookmarks__no-bookmarks-description"
+    );
+    if (noBookmarksDesc) {
+        noBookmarksDesc.textContent = t.noBookmarksDesc;
+    }
+
+    // Add Bookmark button (piercing shadow DOM)
+    container.querySelectorAll("calcite-fab, calcite-button").forEach(btn => {
+        const shadow = btn.shadowRoot;
+        if (!shadow) return;
+
+        const span = shadow.querySelector("span.content");
+        if (span && span.textContent.trim() === "Add bookmark") {
+            span.textContent = t.addBookmark;
+        }
+
+        //update the outer title
+        if (btn.title === "Add bookmark") {
+            btn.title = t.addBookmark;
+        }
+    });
+
+    // Translate the Add Bookmark form
+    const form = container.querySelector(".esri-bookmarks__form");
+    if (form) {
+        const titleLabel = form.querySelector("calcite-label");
+        if (titleLabel) {
+            titleLabel.childNodes[0].textContent = t.title;
+            const input = titleLabel.querySelector("input");
+            if (input) input.placeholder = t.enterTitle;
+        }
+
+        // Cancel button
+        const cancelBtn = form.querySelector('calcite-button[type="button"]');
+        if (cancelBtn && cancelBtn.shadowRoot) {
+            const span = cancelBtn.shadowRoot.querySelector("span.content");
+            if (span) span.textContent = t.cancel;
+        }
+
+        // Add button
+        const addBtn = form.querySelector('calcite-button[type="submit"]');
+        if (addBtn && addBtn.shadowRoot) {
+            const span = addBtn.shadowRoot.querySelector("span.content");
+            if (span) span.textContent = t.add;
+        }
+    }
+}
+
+
+
 
